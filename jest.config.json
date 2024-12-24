@@ -18,6 +18,7 @@
   "collectCoverage": true,
   "collectCoverageFrom": [
     "src/**/*.{ts,tsx}",
+    "!src/index.ts",
     "!tsup.config.ts",
     "!**/coverage/**",
     "!**/dist/**",
