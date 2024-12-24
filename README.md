@@ -1,0 +1,2 @@
+# minivium
+Minimalistic JSON database.
