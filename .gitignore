@@ -128,3 +128,13 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# ide
+.idea
+
+# macOS
+.DS_Store
+
+# generated file and folders
+dist/
+output/
