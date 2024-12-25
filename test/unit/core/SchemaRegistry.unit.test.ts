@@ -5,16 +5,36 @@ describe('Schema Registry', () => {
     const schema = new SchemaRegistry({
       collections: [{
         name: 'users',
-        columns: [ { name: 'username', isRequired: true }]
+        columns: [
+          { name: 'username', isRequired: true },
+          { name: 'password', isRequired: true }
+        ]
       }]
     }).getSchema();
 
     expect(schema).toStrictEqual({
       collections: [{
         name: 'users',
+        columns: [
+          { name: 'username', isRequired: true },
+          { name: 'password', isRequired: true }
+        ]
+      }]
+    });
+  });
+
+  it('Should be able to get collections', () => {
+    const schema = new SchemaRegistry({
+      collections: [{
+        name: 'users',
         columns: [ { name: 'username', isRequired: true }]
       }]
     });
+
+    expect(schema.getCollections()).toStrictEqual([{
+      name: 'users',
+      columns: [ { name: 'username', isRequired: true }]
+    }]);
   });
 
   it('Should be able to get collection names', () => {

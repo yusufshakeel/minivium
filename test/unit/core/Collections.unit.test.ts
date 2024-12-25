@@ -1,75 +1,65 @@
-import fs from 'fs';
 import { Collection } from '../../../src/core/Collection';
+import { FileSync } from '../../../src/core/File';
+import { CollectionType } from '../../../src/types/schema';
 
-describe('Collection.createCollections', () => {
+jest.mock('../../../src/core/File');
+
+describe('Collection', () => {
+  // eslint-disable-next-line
   let collection: Collection;
-  // eslint-disable-next-line
-  let existsSync: any;
-  // eslint-disable-next-line
-  let writeFileSync: any;
-
-  beforeAll(() => {
-    existsSync = jest.spyOn(fs, 'existsSync');
-    writeFileSync = jest.spyOn(fs, 'writeFileSync');
-  });
 
   beforeEach(() => {
     collection = new Collection();
+    jest.clearAllMocks();
   });
 
-  afterAll(() => {
+  afterEach(() => {
     jest.clearAllMocks();
     jest.restoreAllMocks();
   });
 
-  it('should create new collections when they do not exist', () => {
-    const dataDir = '/test-dir';
-    const collectionNames = ['collection1', 'collection2'];
+  describe('createCollectionsSync', () => {
+    it('should create collections with the given names', () => {
+      const dataDir = '/test-dir';
+      const collections: CollectionType[] = [
+        { name: 'collection1', columns: [{ name: 'username', isRequired: true }] },
+        { name: 'collection2', columns: [{ name: 'username', isRequired: true }] }
+      ];
 
-    existsSync.mockImplementation(() => false);
-    writeFileSync.mockImplementation(() => {});
+      const FileSyncMock = FileSync as jest.MockedClass<typeof FileSync>;
 
-    collection.createCollections(dataDir, collectionNames);
+      collection.createCollectionsSync(dataDir, collections);
 
-    expect(existsSync).toHaveBeenCalledWith(`${dataDir}/collection1`);
-    expect(existsSync).toHaveBeenCalledWith(`${dataDir}/collection2`);
-
-    expect(writeFileSync).toHaveBeenCalledWith(`${dataDir}/collection1`, '{}', 'utf8');
-    expect(writeFileSync).toHaveBeenCalledWith(`${dataDir}/collection2`, '{}', 'utf8');
-  });
-
-  it('should not create collections that already exist', () => {
-    const dataDir = '/test-dir';
-    const collectionNames = ['collection1', 'collection2'];
-
-    existsSync.mockImplementation((path: string) => path.includes('collection1'));
-
-    collection.createCollections(dataDir, collectionNames);
-
-    expect(existsSync).toHaveBeenCalledWith(`${dataDir}/collection1`);
-    expect(existsSync).toHaveBeenCalledWith(`${dataDir}/collection2`);
-
-    expect(writeFileSync).toHaveBeenCalledWith(`${dataDir}/collection2`, '{}', 'utf8');
-  });
-
-  it('should log and throw an error if an exception occurs', () => {
-    const dataDir = '/test-dir';
-    const collectionNames = ['collection1'];
-
-    const error = new Error('Test error');
-    existsSync.mockImplementation(() => false);
-    writeFileSync.mockImplementation(() => {
-      console.log('writeFileSync called');
-      throw error;
+      expect(FileSyncMock).toHaveBeenCalledTimes(2);
+      expect(FileSyncMock).toHaveBeenCalledWith(dataDir, 'collection1');
+      expect(FileSyncMock).toHaveBeenCalledWith(dataDir, 'collection2');
+      expect(FileSyncMock.mock.instances[0].createSync).toHaveBeenCalledWith('[]');
+      expect(FileSyncMock.mock.instances[1].createSync).toHaveBeenCalledWith('[]');
     });
 
-    const consoleErrorSpy =
-      jest.spyOn(console, 'error').mockImplementation(() => {});
+    it('should log and throw an error if an exception occurs', () => {
+      const dataDir = '/test-dir';
+      const collections: CollectionType[] = [
+        { name: 'collection1', columns: [{ name: 'username', isRequired: true }] }
+      ];
 
-    expect(() => collection.createCollections(dataDir, collectionNames)).toThrow(error);
+      const FileSyncMock = FileSync as jest.MockedClass<typeof FileSync>;
 
-    expect(consoleErrorSpy).toHaveBeenCalledWith(error);
+      const error = new Error('Test error');
+      FileSyncMock.mockImplementation(() => {
+        throw error;
+      });
 
-    consoleErrorSpy.mockRestore();
+      const consoleErrorSpy =
+        jest.spyOn(console, 'error').mockImplementation(() => {});
+
+      expect(() => {
+        collection.createCollectionsSync(dataDir, collections);
+      }).toThrow(error);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(error);
+
+      consoleErrorSpy.mockRestore();
+    });
   });
 });

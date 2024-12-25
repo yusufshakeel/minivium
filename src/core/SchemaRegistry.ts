@@ -1,4 +1,4 @@
-import { Schema } from '../types/schema';
+import { CollectionType, Schema } from '../types/schema';
 
 export class SchemaRegistry {
   private readonly schema: Schema;
@@ -9,6 +9,10 @@ export class SchemaRegistry {
 
   getSchema(): Schema {
     return this.schema;
+  }
+
+  getCollections(): CollectionType[] {
+    return this.schema.collections;
   }
 
   getCollectionNames(): string[] {

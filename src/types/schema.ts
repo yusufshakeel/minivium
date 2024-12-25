@@ -1,13 +1,13 @@
 export type Column = {
   name: string;
-  isRequired: boolean;
+  isRequired?: boolean;
 };
 
-export type Collections = {
+export type CollectionType = {
   name: string;
   columns: Column[];
 };
 
 export type Schema = {
-  collections: Collections[];
+  collections: CollectionType[];
 }

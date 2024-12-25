@@ -1,16 +1,12 @@
-import fs from 'fs';
+import { CollectionType } from '../types/schema';
+import { FileSync } from './File';
 
 export class Collection {
-  createCollections(dataDir: string, collectionNames: string[]) {
+  createCollectionsSync(dataDir: string, collections: CollectionType[]) {
     try {
-      collectionNames.forEach(collectionName => {
-        const collectionFilePath = `${dataDir}/${collectionName}`;
-        if(fs.existsSync(collectionFilePath)) {
-          console.log(`Collection ${collectionName} already exists`);
-        } else {
-          console.log(`Creating ${collectionName} collection`);
-          fs.writeFileSync(collectionFilePath, '{}', 'utf8');
-        }
+      collections.forEach(collection => {
+        const { name: collectionName } = collection;
+        new FileSync(dataDir, collectionName).createSync('[]');
       });
     } catch (err) {
       console.error(err);
