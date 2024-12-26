@@ -2,31 +2,33 @@ import fs from 'fs';
 import path from 'path';
 
 export class FileSync {
-  private readonly collectionName: string;
-  private readonly filePath: string;
+  private readonly dataDir: string;
 
-  constructor(dataDir: string, collectionName: string) {
-    this.collectionName = collectionName;
-    this.filePath = path.join(dataDir, collectionName);
+  constructor(dataDir: string) {
+    this.dataDir = dataDir;
   }
 
-  private checkExistsSync() {
-    if (!fs.existsSync(this.filePath)) {
-      throw new Error(`File ${this.collectionName} does not exist`);
+  private getFilePath(collectionName: string) {
+    return path.join(this.dataDir, collectionName);
+  }
+
+  private checkExistsSync(collectionName: string) {
+    if (!fs.existsSync(this.getFilePath(collectionName))) {
+      throw new Error(`File '${collectionName}' does not exist`);
     }
   }
 
-  createSync(content: string): void {
-    fs.writeFileSync(this.filePath, content, 'utf8');
+  createSync(collectionName: string, content: string): void {
+    fs.writeFileSync(this.getFilePath(collectionName), content, 'utf8');
   }
 
-  readSync(): string {
-    this.checkExistsSync();
-    return fs.readFileSync(this.filePath, 'utf8');
+  readSync(collectionName: string): string {
+    this.checkExistsSync(collectionName);
+    return fs.readFileSync(this.getFilePath(collectionName), 'utf8');
   }
 
-  writeSync(content: string): void {
-    this.checkExistsSync();
-    fs.writeFileSync(this.filePath, content, 'utf8');
+  writeSync(collectionName: string, content: string): void {
+    this.checkExistsSync(collectionName);
+    fs.writeFileSync(this.getFilePath(collectionName), content, 'utf8');
   }
 }

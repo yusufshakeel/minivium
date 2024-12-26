@@ -27,7 +27,7 @@ describe('FileSync', () => {
 
   beforeEach(() => {
     pathJoin.mockReturnValue(filePath);
-    fileSync = new FileSync(dataDir, collectionName);
+    fileSync = new FileSync(dataDir);
     jest.clearAllMocks();
   });
 
@@ -41,7 +41,7 @@ describe('FileSync', () => {
       const content = '{"key":"value"}';
       writeFileSync.mockReturnValue();
 
-      fileSync.createSync(content);
+      fileSync.createSync(collectionName, content);
 
       expect(writeFileSync).toHaveBeenCalledWith(filePath, content, 'utf8');
     });
@@ -53,7 +53,7 @@ describe('FileSync', () => {
       existsSync.mockReturnValue(true);
       readFileSync.mockReturnValue(content);
 
-      const result = fileSync.readSync();
+      const result = fileSync.readSync(collectionName);
 
       expect(existsSync).toHaveBeenCalledWith(filePath);
       expect(readFileSync).toHaveBeenCalledWith(filePath, 'utf8');
@@ -63,7 +63,8 @@ describe('FileSync', () => {
     it('should throw an error if the file does not exist', () => {
       existsSync.mockReturnValue(false);
 
-      expect(() => fileSync.readSync()).toThrow(`File ${collectionName} does not exist`);
+      expect(() => fileSync.readSync(collectionName))
+        .toThrow(`File '${collectionName}' does not exist`);
       expect(existsSync).toHaveBeenCalledWith(filePath);
     });
   });
@@ -74,7 +75,7 @@ describe('FileSync', () => {
       existsSync.mockReturnValue(true);
       writeFileSync.mockReturnValue();
 
-      fileSync.writeSync(content);
+      fileSync.writeSync(collectionName, content);
 
       expect(existsSync).toHaveBeenCalledWith(filePath);
       expect(writeFileSync).toHaveBeenCalledWith(filePath, content, 'utf8');
@@ -84,7 +85,8 @@ describe('FileSync', () => {
       const content = '{"key":"updated-value"}';
       existsSync.mockReturnValue(false);
 
-      expect(() => fileSync.writeSync(content)).toThrow(`File ${collectionName} does not exist`);
+      expect(() => fileSync.writeSync(collectionName, content))
+        .toThrow(`File '${collectionName}' does not exist`);
       expect(existsSync).toHaveBeenCalledWith(filePath);
     });
   });
