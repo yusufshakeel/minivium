@@ -30,7 +30,10 @@ const { minivium } = require("minivium");
 
 ## Limits
 
-This will work well with small data (less than 10MB).
+This will work well with small data (about 5MB). You may face performance issues with
+larger data size because the content is serialized using `JSON.stringify` and
+then saved in a file.
+
 If you are planning to have more data then check out PostgreSQL.
 
 ## License
