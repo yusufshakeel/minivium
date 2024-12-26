@@ -13,4 +13,13 @@ export class Collection {
       throw err;
     }
   }
+
+  dropCollectionSync(dataDir: string, collectionName: string) {
+    try {
+      new FileSync(dataDir).deleteFileSync(collectionName);
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  }
 }

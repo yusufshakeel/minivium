@@ -5,7 +5,6 @@ import { CollectionType } from '../../../src/types/schema';
 jest.mock('../../../src/core/File');
 
 describe('Collection', () => {
-  // eslint-disable-next-line
   let collection: Collection;
 
   beforeEach(() => {
@@ -31,7 +30,6 @@ describe('Collection', () => {
       collection.createCollectionsSync(dataDir, collections);
 
       expect(FileSyncMock).toHaveBeenCalledTimes(2);
-      expect(FileSyncMock).toHaveBeenCalledWith(dataDir);
       expect(FileSyncMock).toHaveBeenCalledWith(dataDir);
       expect(FileSyncMock.mock.instances[0].createSync)
         .toHaveBeenCalledWith('collection1','[]');
@@ -62,6 +60,19 @@ describe('Collection', () => {
       expect(consoleErrorSpy).toHaveBeenCalledWith(error);
 
       consoleErrorSpy.mockRestore();
+    });
+  });
+
+  describe('dropCollectionSync', () => {
+    it('should be able to drop collection', () => {
+      const dataDir = '/test-dir';
+      const FileSyncMock = FileSync as jest.MockedClass<typeof FileSync>;
+
+      collection.dropCollectionSync(dataDir, 'collection1');
+
+      expect(FileSyncMock.mock.instances[0].deleteFileSync).toHaveBeenCalledWith(
+        'collection1'
+      );
     });
   });
 });

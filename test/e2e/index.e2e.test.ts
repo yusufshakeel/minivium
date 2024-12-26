@@ -37,6 +37,13 @@ describe('minivium', () => {
     expect(db.query.select('posts-e2e')).toStrictEqual([]);
   });
 
+  it('should be able to drop collection', () => {
+    const before = db.query.select('users-e2e');
+    db.dropCollection('users-e2e');
+    expect(before).toStrictEqual([]);
+    expect(() => db.query.select('users-e2e')).toThrow("File 'users-e2e' does not exist");
+  });
+
   it('should be able to insert, update, select and delete data', () => {
     const beforeContent = db.query.select('users-e2e');
 

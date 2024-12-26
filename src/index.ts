@@ -14,10 +14,17 @@ function minivium(config: Config): MiniviumType {
     );
   };
 
+  const dropCollection = (collectionName: string) => {
+    new Collection().dropCollectionSync(
+      config.dataDir,
+      collectionName
+    );
+  };
+
   const fileSync = new FileSync(config.dataDir);
   const query = new Query(config.schemaRegistry, fileSync);
 
-  return { init, query };
+  return { init, query, dropCollection };
 }
 
 export { minivium, SchemaRegistry, Op };
