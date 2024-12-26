@@ -1,6 +1,7 @@
 import { SchemaRegistry } from '../../../src/core/SchemaRegistry';
 import { FileSync } from '../../../src/core/File';
 import { Query } from '../../../src/core/Query';
+import { Op } from '../../../src/core/Operators';
 
 jest.mock('../../../src/core/File');
 
@@ -134,6 +135,59 @@ describe('Query', () => {
           { id:'193fce9d5cb', username:'yusuf', password:'123456' },
           { id:'193fce9df12', username:'john', password:'123456', phoneNumber:'1234' },
           { id:'193fce9ea27', username:'jane', password:'123456' }
+        ])
+      );
+    });
+  });
+
+  describe('delete', () => {
+    it('should return 0 if zero rows were deleted', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"}]'
+      );
+      const result = query.delete(
+        'users',
+        { where: { id: 1 } }
+      );
+      expect(result).toBe(0);
+      expect(mockFileSyncInstance.writeSync).not.toHaveBeenCalled();
+    });
+
+    it('should return 1 if one row was deleted', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+      );
+      const result = query.delete(
+        'users',
+        { where: { phoneNumber: '123' } }
+      );
+      expect(result).toBe(1);
+      expect(mockFileSyncInstance.writeSync).toHaveBeenCalledWith(
+        'users',
+        JSON.stringify([
+          { id:'193fce9d5cb', username:'yusuf', password:'123456' },
+          { id:'193fce9ea27', username:'jane', password:'123456' }
+        ])
+      );
+    });
+
+    it('should return N if N row were deleted', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+      );
+      const result = query.delete(
+        'users',
+        { where: { id: { [Op.in]: ['193fce9df12', '193fce9ea27'] } } }
+      );
+      expect(result).toBe(2);
+      expect(mockFileSyncInstance.writeSync).toHaveBeenCalledWith(
+        'users',
+        JSON.stringify([
+          { id:'193fce9d5cb', username:'yusuf', password:'123456' }
         ])
       );
     });

@@ -96,4 +96,28 @@ export class Query {
 
     return updatedRowCount;
   }
+
+  delete(collectionName: string, option: QueryOption): number {
+    this.collectionExists(collectionName);
+
+    const currentData = this.readCollectionContent(collectionName);
+
+    let deletedRowCount = 0;
+    const dataToKeep = currentData.reduce(
+      (acc: any, curr: any) => {
+        if(filter([curr], option.where).length) {
+          deletedRowCount++;
+          return acc;
+        }
+        return [...acc, curr];
+      }, []);
+
+    if(deletedRowCount === 0) {
+      return deletedRowCount;
+    }
+
+    this.writeCollectionContent(collectionName, dataToKeep);
+
+    return deletedRowCount;
+  }
 }

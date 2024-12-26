@@ -39,7 +39,7 @@ describe('Collection', () => {
         .toHaveBeenCalledWith('collection2','[]');
     });
 
-    it('should log and throw an error if an exception occurs', () => {
+    it('should log and throw an error if an exception occurs for create collections', () => {
       const dataDir = '/test-dir';
       const collections: CollectionType[] = [
         { name: 'collection1', columns: [{ name: 'username', isRequired: true }] }
