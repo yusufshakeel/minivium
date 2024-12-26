@@ -2,7 +2,7 @@
 Minimalistic JSON database.
 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/yusufshakeel/minivium)
-[![npm version](https://img.shields.io/badge/npm-0.1.0-blue.svg)](https://www.npmjs.com/package/minivium)
+[![npm version](https://img.shields.io/badge/npm-0.1.1-blue.svg)](https://www.npmjs.com/package/minivium)
 [![npm Downloads](https://img.shields.io/npm/dm/minivium.svg)](https://www.npmjs.com/package/minivium)
 
 ![logo.webp](assets/logo.webp)
@@ -20,6 +20,7 @@ Minimalistic JSON database.
   * [Create schema registry and data directory](#create-schema-registry-and-data-directory)
   * [Initialise the collections](#initialise-the-collections)
   * [Drop collection](#drop-collection)
+  * [Drop all collection](#drop-all-collection)
 * [Query](#query)
   * [Insert](#insert)
   * [Select](#select)
@@ -97,6 +98,13 @@ db.init();
 ```js
 const db = minivium({ dataDir, schemaRegistry });
 db.dropCollection('users');
+```
+
+### Drop all collection
+
+```js
+const db = minivium({ dataDir, schemaRegistry });
+db.dropAllCollections();
 ```
 
 ## Query
