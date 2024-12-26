@@ -13,6 +13,33 @@ Minimalistic JSON database.
 * JSON database
 * Query language
 
+## Table of Contents
+* [Getting Started](#getting-started)
+  * [Install the package](#install-the-package)
+  * [Import](#import)
+  * [Create schema registry and data directory](#create-schema-registry-and-data-directory)
+  * [Initialise the collections](#initialise-the-collections)
+* [Query](#query)
+  * [Insert](#insert)
+  * [Select](#select)
+  * [Update](#update)
+  * [Delete](#delete)
+* [Operators for where clause](#operators-for-where-clause)
+  * [Equal](#equal-eq)
+  * [Not equal](#not-equal-noteq)
+  * [In](#in-in)
+  * [Not in](#not-in-notin)
+  * [Greater than](#greater-than-gt)
+  * [Greater than or equal to](#greater-than-or-equal-to-gte)
+  * [Less than](#less-than-lt)
+  * [Less than or equal to](#less-than-or-equal-to-lte)
+  * [Between](#between-between)
+  * [And](#and-and)
+  * [Or](#or-or)
+* [Limits](#limits)
+* [License](#license)
+* [Donate](#donate)
+
 ## Getting started
 
 Data is saved in JSON format in collections. A collection is like a table in relational
@@ -20,13 +47,13 @@ database. Each row is saved inside a collection and referred as document (or tup
 
 Minivium comes with a simple query language inspired by Sequalize and Mango Query.
 
-### Install the repository
+### Install the package
 
 ```shell
 npm i minivium
 ```
 
-### Import/Require
+### Import
 
 ```js
 // ESM
@@ -100,7 +127,7 @@ const updatedRowCount = db.query.update(
 );
 ```
 
-## Delete
+### Delete
 
 ```js
 const deletedRowCount = db.query.delete(
@@ -354,6 +381,6 @@ It's free :smiley:
 
 [MIT License](https://github.com/yusufshakeel/minivium/blob/main/LICENSE) Copyright (c) 2024 Yusuf Shakeel
 
-### Donate
+## Donate
 
 Feeling generous :smiley: [Donate via PayPal](https://www.paypal.me/yusufshakeel)
