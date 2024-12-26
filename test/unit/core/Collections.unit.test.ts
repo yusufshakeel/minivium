@@ -31,10 +31,12 @@ describe('Collection', () => {
       collection.createCollectionsSync(dataDir, collections);
 
       expect(FileSyncMock).toHaveBeenCalledTimes(2);
-      expect(FileSyncMock).toHaveBeenCalledWith(dataDir, 'collection1');
-      expect(FileSyncMock).toHaveBeenCalledWith(dataDir, 'collection2');
-      expect(FileSyncMock.mock.instances[0].createSync).toHaveBeenCalledWith('[]');
-      expect(FileSyncMock.mock.instances[1].createSync).toHaveBeenCalledWith('[]');
+      expect(FileSyncMock).toHaveBeenCalledWith(dataDir);
+      expect(FileSyncMock).toHaveBeenCalledWith(dataDir);
+      expect(FileSyncMock.mock.instances[0].createSync)
+        .toHaveBeenCalledWith('collection1','[]');
+      expect(FileSyncMock.mock.instances[1].createSync)
+        .toHaveBeenCalledWith('collection2','[]');
     });
 
     it('should log and throw an error if an exception occurs', () => {

@@ -6,7 +6,7 @@ export class Collection {
     try {
       collections.forEach(collection => {
         const { name: collectionName } = collection;
-        new FileSync(dataDir, collectionName).createSync('[]');
+        new FileSync(dataDir).createSync(collectionName, '[]');
       });
     } catch (err) {
       console.error(err);
