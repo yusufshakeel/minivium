@@ -10,7 +10,7 @@ export class Collection {
     this.collections = collections;
   }
 
-  createFileIfNotExistsSync() {
+  createCollectionsIfNotExistsSync() {
     try {
       this.collections.forEach(collection => {
         const { name: collectionName } = collection;

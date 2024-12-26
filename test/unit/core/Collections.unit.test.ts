@@ -16,10 +16,12 @@ describe('Collection', () => {
     jest.restoreAllMocks();
   });
 
-  describe('createFileIfNotExistsSync', () => {
+  describe('createCollectionsIfNotExistsSync', () => {
     it('should be able to create the collections', () => {
       const fileSync = { createFileIfNotExistsSync };
-      new Collection(fileSync as unknown as FileSync, collections).createFileIfNotExistsSync();
+      new Collection(fileSync as unknown as FileSync, collections)
+        .createCollectionsIfNotExistsSync();
+
       expect(createFileIfNotExistsSync).toHaveBeenCalledWith('collection1');
       expect(createFileIfNotExistsSync).toHaveBeenCalledWith('collection2');
     });
@@ -30,8 +32,10 @@ describe('Collection', () => {
           throw new Error('Some error');
         })
       };
+
       expect(() => {
-        new Collection(fileSync as unknown as FileSync, collections).createFileIfNotExistsSync();
+        new Collection(fileSync as unknown as FileSync, collections)
+          .createCollectionsIfNotExistsSync();
       }).toThrow('Some error');
     });
   });
