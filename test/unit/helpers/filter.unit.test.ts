@@ -16,6 +16,10 @@ describe('filter', () => {
     }).toThrow('Unsupported operator: hahaOp');
   });
 
+  it('should fetch everything if filter option is not provided', () => {
+    expect(filter(data, {})).toStrictEqual(data);
+  });
+
   it('should empty array when no condition is met', () => {
     const result = filter(data, { id: 1000 });
     expect(result).toStrictEqual([]);

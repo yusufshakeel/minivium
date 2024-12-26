@@ -71,6 +71,11 @@ export class Query {
     return dataToInsert.id;
   }
 
+  select(collectionName: string, option: QueryOption): any[] {
+    this.collectionExists(collectionName);
+    return filter(this.readCollectionContent(collectionName), option.where);
+  }
+
   update(collectionName: string, data: object, option: QueryOption): number {
     this.collectionExists(collectionName);
 

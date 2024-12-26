@@ -138,6 +138,28 @@ describe('Query', () => {
         ])
       );
     });
+
+    it('should update all the rows if no filter is supplied', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+      );
+      const result = query.update(
+        'users',
+        { phoneNumber: '1234' },
+        { where: {} }
+      );
+      expect(result).toBe(3);
+      expect(mockFileSyncInstance.writeSync).toHaveBeenCalledWith(
+        'users',
+        JSON.stringify([
+          { id:'193fce9d5cb', username:'yusuf', password:'123456', phoneNumber:'1234' },
+          { id:'193fce9df12', username:'john', password:'123456', phoneNumber:'1234' },
+          { id:'193fce9ea27', username:'jane', password:'123456', phoneNumber:'1234' }
+        ])
+      );
+    });
   });
 
   describe('delete', () => {
@@ -190,6 +212,70 @@ describe('Query', () => {
           { id:'193fce9d5cb', username:'yusuf', password:'123456' }
         ])
       );
+    });
+
+    it('should be able to delete everything if no filter is supplied', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+      );
+      const result = query.delete(
+        'users',
+        { where: {} }
+      );
+      expect(result).toBe(3);
+      expect(mockFileSyncInstance.writeSync).toHaveBeenCalledWith(
+        'users',
+        JSON.stringify([])
+      );
+    });
+  });
+
+  describe('select', () => {
+    it('should be able to select all the rows', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+      );
+      const result = query.select(
+        'users',
+        { where: {} }
+      );
+      expect(result).toStrictEqual([
+        { id: '193fce9d5cb', username: 'yusuf', password: '123456' },
+        { id: '193fce9df12', username: 'john', password: '123456', phoneNumber: '123' },
+        { id: '193fce9ea27', username: 'jane', password: '123456' }
+      ]);
+    });
+
+    it('should be able to select rows by filter', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+      );
+      const result = query.select(
+        'users',
+        { where: { phoneNumber: '123' } }
+      );
+      expect(result).toStrictEqual([
+        { id: '193fce9df12', username: 'john', password: '123456', phoneNumber: '123' }
+      ]);
+    });
+
+    it('should return empty array if no match is found', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+      );
+      const result = query.select(
+        'users',
+        { where: { id: '1' } }
+      );
+      expect(result).toStrictEqual([]);
     });
   });
 });
