@@ -19,7 +19,7 @@ Minimalistic JSON database.
   * [Import](#import)
   * [Create schema registry and data directory](#create-schema-registry-and-data-directory)
   * [Initialise the collections](#initialise-the-collections)
-  * [Drop collections](#drop-collections)
+  * [Drop collection](#drop-collection)
 * [Query](#query)
   * [Insert](#insert)
   * [Select](#select)
@@ -92,7 +92,7 @@ const db = minivium({ dataDir, schemaRegistry });
 db.init();
 ```
 
-### Drop collections
+### Drop collection
 
 ```js
 const db = minivium({ dataDir, schemaRegistry });
