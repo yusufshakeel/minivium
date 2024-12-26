@@ -101,4 +101,41 @@ describe('Query', () => {
       d.mockRestore();
     });
   });
+
+  describe('update', () => {
+    it('should return 0 if zero rows were updated', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"}]'
+      );
+      const result = query.update(
+        'users',
+        { phoneNumber: '123' },
+        { where: { id: 1 } }
+      );
+      expect(result).toBe(0);
+      expect(mockFileSyncInstance.writeSync).not.toHaveBeenCalled();
+    });
+
+    it('should return 1 if one row update', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+      );
+      const result = query.update(
+        'users',
+        { phoneNumber: '1234' },
+        { where: { phoneNumber: '123' } }
+      );
+      expect(result).toBe(1);
+      expect(mockFileSyncInstance.writeSync).toHaveBeenCalledWith(
+        'users',
+        JSON.stringify([
+          { id:'193fce9d5cb', username:'yusuf', password:'123456' },
+          { id:'193fce9df12', username:'john', password:'123456', phoneNumber:'1234' },
+          { id:'193fce9ea27', username:'jane', password:'123456' }
+        ])
+      );
+    });
+  });
 });

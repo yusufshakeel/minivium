@@ -1,6 +1,8 @@
 import { SchemaRegistry } from './SchemaRegistry';
 import { FileSync } from './File';
 import { genId } from '../utils/id';
+import { QueryOption } from '../types/query';
+import { filter } from '../helpers/filter';
 
 export class Query {
   private readonly schemaRegistry: SchemaRegistry;
@@ -43,8 +45,7 @@ export class Query {
   insert(collectionName: string, data: object): string {
     this.collectionExists(collectionName);
 
-    const dataForColumns =
-      this.getDataForColumns(collectionName, data);
+    const dataForColumns = this.getDataForColumns(collectionName, data);
 
     const dataToInsert = { id: genId(), ...dataForColumns };
 
@@ -68,5 +69,31 @@ export class Query {
     this.writeCollectionContent(collectionName, [ ...currentData, dataToInsert ]);
 
     return dataToInsert.id;
+  }
+
+  update(collectionName: string, data: object, option: QueryOption): number {
+    this.collectionExists(collectionName);
+
+    const dataForColumns = this.getDataForColumns(collectionName, data);
+
+    const currentData = this.readCollectionContent(collectionName);
+
+    let updatedRowCount = 0;
+    const dataToUpdate = currentData.reduce(
+      (acc: any, curr: any) => {
+        if(filter([curr], option.where).length) {
+          updatedRowCount++;
+          return [...acc, { ...curr, ...dataForColumns }];
+        }
+        return [...acc, curr];
+      }, []);
+
+    if(updatedRowCount === 0) {
+      return updatedRowCount;
+    }
+
+    this.writeCollectionContent(collectionName, dataToUpdate);
+
+    return updatedRowCount;
   }
 }

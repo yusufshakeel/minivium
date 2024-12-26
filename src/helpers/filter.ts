@@ -1,13 +1,5 @@
 import { Op } from '../core/Operators';
-
-type Condition = {
-  [column: string]: any;
-};
-
-type Filter =
-  | { and: Filter[] }
-  | { or: Filter[] }
-  | Condition;
+import { Filter, Condition } from '../types/where';
 
 const actions: any = {
   [Op.eq]: (itemValue: any, value: any) => itemValue === value,
