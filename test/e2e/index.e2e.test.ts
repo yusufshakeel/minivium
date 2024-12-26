@@ -1,5 +1,5 @@
 import path from 'path';
-import { minivium, SchemaRegistry } from '../../src';
+import { minivium, SchemaRegistry, Op } from '../../src';
 import { MiniviumType } from '../../src/types/minivium';
 
 describe('minivium', () => {
@@ -58,7 +58,10 @@ describe('minivium', () => {
 
     const deletedRowCount = db.query.delete('users-e2e', { where: { id } });
 
-    const selectedRowAfterDelete = db.query.select('users-e2e', { where: { id } });
+    const selectedRowAfterDelete = db.query.select(
+      'users-e2e',
+      { where: { id: { [Op.eq]: id } } }
+    );
 
     expect(beforeContent).toStrictEqual([]);
     expect(selectedById).toStrictEqual([{
