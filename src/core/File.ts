@@ -31,4 +31,9 @@ export class FileSync {
     this.checkExistsSync(collectionName);
     fs.writeFileSync(this.getFilePath(collectionName), content, 'utf8');
   }
+
+  deleteFileSync(collectionName: string): void {
+    this.checkExistsSync(collectionName);
+    fs.unlinkSync(this.getFilePath(collectionName));
+  }
 }

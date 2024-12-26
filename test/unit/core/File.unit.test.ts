@@ -7,15 +7,11 @@ describe('FileSync', () => {
   const collectionName = 'test-collection.json';
   const filePath = `${dataDir}/${collectionName}`;
 
-  // eslint-disable-next-line
   let pathJoin: any;
-  // eslint-disable-next-line
   let existsSync: any;
-  // eslint-disable-next-line
   let writeFileSync: any;
-  // eslint-disable-next-line
   let readFileSync: any;
-  // eslint-disable-next-line
+  let unlinkSync: any;
   let fileSync: any;
 
   beforeAll(() => {
@@ -23,6 +19,7 @@ describe('FileSync', () => {
     existsSync = jest.spyOn(fs, 'existsSync');
     writeFileSync = jest.spyOn(fs, 'writeFileSync');
     readFileSync = jest.spyOn(fs, 'readFileSync');
+    unlinkSync = jest.spyOn(fs, 'unlinkSync');
   });
 
   beforeEach(() => {
@@ -88,6 +85,17 @@ describe('FileSync', () => {
       expect(() => fileSync.writeSync(collectionName, content))
         .toThrow(`File '${collectionName}' does not exist`);
       expect(existsSync).toHaveBeenCalledWith(filePath);
+    });
+  });
+
+  describe('deleteFileSync', () => {
+    it('should be able to delete file', () => {
+      existsSync.mockReturnValue(true);
+      unlinkSync.mockReturnValue();
+      fileSync.deleteFileSync(collectionName);
+
+      expect(existsSync).toHaveBeenCalledWith(filePath);
+      expect(unlinkSync).toHaveBeenCalledWith(filePath);
     });
   });
 });
