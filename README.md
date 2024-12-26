@@ -37,7 +37,7 @@ Minimalistic JSON database.
   * [Between](#between-between)
   * [And](#and-and)
   * [Or](#or-or)
-* [Limits](#limits)
+* [Limitations](#limitations)
 * [License](#license)
 * [Donate](#donate)
 
@@ -375,7 +375,7 @@ where status = 'active' or score >= 40;
 ```
 
 
-## Limits
+## Limitations
 
 This will work well with small data (about 5MB). You may face performance issues with
 larger data size because the content is serialized using `JSON.stringify` and
