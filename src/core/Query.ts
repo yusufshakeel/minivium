@@ -1,6 +1,6 @@
 import { SchemaRegistry } from './SchemaRegistry';
 import { FileSync } from './File';
-import { genId } from './id';
+import { genId } from '../utils/id';
 
 export class Query {
   private readonly schemaRegistry: SchemaRegistry;
