@@ -11,7 +11,7 @@ function minivium(config: Config): MiniviumType {
   const collections = new Collection(fileSync, config.schemaRegistry.getCollections());
   const query = new Query(config.schemaRegistry, fileSync);
 
-  const init = () => collections.createCollectionsSync();
+  const init = () => collections.createFileIfNotExistsSync();
 
   const dropCollection =
     (collectionName: string) => collections.dropCollectionSync(collectionName);

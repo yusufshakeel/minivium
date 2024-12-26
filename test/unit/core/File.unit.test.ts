@@ -44,6 +44,20 @@ describe('FileSync', () => {
     });
   });
 
+  describe('createFileIfNotExistsSync', () => {
+    it('should be able to create collection', () => {
+      existsSync.mockReturnValue(false);
+      fileSync.createFileIfNotExistsSync(collectionName);
+      expect(writeFileSync).toHaveBeenCalledWith(filePath, '[]', 'utf8');
+    });
+
+    it('should do nothing if file already exists', () => {
+      existsSync.mockReturnValue(true);
+      fileSync.createFileIfNotExistsSync(collectionName);
+      expect(writeFileSync).not.toHaveBeenCalled();
+    });
+  });
+
   describe('readSync', () => {
     it('should read content from an existing file', () => {
       const content = '{"key":"value"}';

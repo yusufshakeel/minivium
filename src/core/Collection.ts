@@ -10,11 +10,11 @@ export class Collection {
     this.collections = collections;
   }
 
-  createCollectionsSync() {
+  createFileIfNotExistsSync() {
     try {
       this.collections.forEach(collection => {
         const { name: collectionName } = collection;
-        this.fileSync.createSync(collectionName, '[]');
+        this.fileSync.createFileIfNotExistsSync(collectionName);
       });
     } catch (err) {
       console.error(err);

@@ -8,7 +8,7 @@ describe('Collection', () => {
     { name: 'collection2', columns: [{ name: 'username', isRequired: true }] }
   ];
 
-  const createSync = jest.fn();
+  const createFileIfNotExistsSync = jest.fn();
   const deleteFileSync = jest.fn();
 
   afterEach(() => {
@@ -16,22 +16,22 @@ describe('Collection', () => {
     jest.restoreAllMocks();
   });
 
-  describe('createCollectionsSync', () => {
+  describe('createFileIfNotExistsSync', () => {
     it('should be able to create the collections', () => {
-      const fileSync = { createSync };
-      new Collection(fileSync as unknown as FileSync, collections).createCollectionsSync();
-      expect(createSync).toHaveBeenCalledWith('collection1', '[]');
-      expect(createSync).toHaveBeenCalledWith('collection2', '[]');
+      const fileSync = { createFileIfNotExistsSync };
+      new Collection(fileSync as unknown as FileSync, collections).createFileIfNotExistsSync();
+      expect(createFileIfNotExistsSync).toHaveBeenCalledWith('collection1');
+      expect(createFileIfNotExistsSync).toHaveBeenCalledWith('collection2');
     });
 
     it('should throw error when it is unable to create collections', () => {
       const fileSync = {
-        createSync: jest.fn(() => {
+        createFileIfNotExistsSync: jest.fn(() => {
           throw new Error('Some error');
         })
       };
       expect(() => {
-        new Collection(fileSync as unknown as FileSync, collections).createCollectionsSync();
+        new Collection(fileSync as unknown as FileSync, collections).createFileIfNotExistsSync();
       }).toThrow('Some error');
     });
   });
