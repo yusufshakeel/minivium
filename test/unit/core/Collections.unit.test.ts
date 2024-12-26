@@ -2,15 +2,14 @@ import { Collection } from '../../../src/core/Collection';
 import { FileSync } from '../../../src/core/File';
 import { CollectionType } from '../../../src/types/schema';
 
-jest.mock('../../../src/core/File');
-
 describe('Collection', () => {
-  let collection: Collection;
+  const collections: CollectionType[] = [
+    { name: 'collection1', columns: [{ name: 'username', isRequired: true }] },
+    { name: 'collection2', columns: [{ name: 'username', isRequired: true }] }
+  ];
 
-  beforeEach(() => {
-    collection = new Collection();
-    jest.clearAllMocks();
-  });
+  const createSync = jest.fn();
+  const deleteFileSync = jest.fn();
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -18,61 +17,61 @@ describe('Collection', () => {
   });
 
   describe('createCollectionsSync', () => {
-    it('should create collections with the given names', () => {
-      const dataDir = '/test-dir';
-      const collections: CollectionType[] = [
-        { name: 'collection1', columns: [{ name: 'username', isRequired: true }] },
-        { name: 'collection2', columns: [{ name: 'username', isRequired: true }] }
-      ];
-
-      const FileSyncMock = FileSync as jest.MockedClass<typeof FileSync>;
-
-      collection.createCollectionsSync(dataDir, collections);
-
-      expect(FileSyncMock).toHaveBeenCalledTimes(2);
-      expect(FileSyncMock).toHaveBeenCalledWith(dataDir);
-      expect(FileSyncMock.mock.instances[0].createSync)
-        .toHaveBeenCalledWith('collection1','[]');
-      expect(FileSyncMock.mock.instances[1].createSync)
-        .toHaveBeenCalledWith('collection2','[]');
+    it('should be able to create the collections', () => {
+      const fileSync = { createSync };
+      new Collection(fileSync as unknown as FileSync, collections).createCollectionsSync();
+      expect(createSync).toHaveBeenCalledWith('collection1', '[]');
+      expect(createSync).toHaveBeenCalledWith('collection2', '[]');
     });
 
-    it('should log and throw an error if an exception occurs for create collections', () => {
-      const dataDir = '/test-dir';
-      const collections: CollectionType[] = [
-        { name: 'collection1', columns: [{ name: 'username', isRequired: true }] }
-      ];
-
-      const FileSyncMock = FileSync as jest.MockedClass<typeof FileSync>;
-
-      const error = new Error('Test error');
-      FileSyncMock.mockImplementation(() => {
-        throw error;
-      });
-
-      const consoleErrorSpy =
-        jest.spyOn(console, 'error').mockImplementation(() => {});
-
+    it('should throw error when it is unable to create collections', () => {
+      const fileSync = {
+        createSync: jest.fn(() => {
+          throw new Error('Some error');
+        })
+      };
       expect(() => {
-        collection.createCollectionsSync(dataDir, collections);
-      }).toThrow(error);
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith(error);
-
-      consoleErrorSpy.mockRestore();
+        new Collection(fileSync as unknown as FileSync, collections).createCollectionsSync();
+      }).toThrow('Some error');
     });
   });
 
   describe('dropCollectionSync', () => {
-    it('should be able to drop collection', () => {
-      const dataDir = '/test-dir';
-      const FileSyncMock = FileSync as jest.MockedClass<typeof FileSync>;
+    it('should be able to drop the collections', () => {
+      const fileSync = { deleteFileSync };
+      new Collection(fileSync as unknown as FileSync, collections).dropCollectionSync('collection1');
+      expect(deleteFileSync).toHaveBeenCalledWith('collection1');
+    });
 
-      collection.dropCollectionSync(dataDir, 'collection1');
+    it('should throw error when it is unable to drop collections', () => {
+      const fileSync = {
+        deleteFileSync: jest.fn(() => {
+          throw new Error('Some error');
+        })
+      };
+      expect(() => {
+        new Collection(fileSync as unknown as FileSync, collections).dropCollectionSync('collection1');
+      }).toThrow('Some error');
+    });
+  });
 
-      expect(FileSyncMock.mock.instances[0].deleteFileSync).toHaveBeenCalledWith(
-        'collection1'
-      );
+  describe('dropAllCollectionSync', () => {
+    it('should be able to drop all collections', () => {
+      const fileSync = { deleteFileSync };
+      new Collection(fileSync as unknown as FileSync, collections).dropAllCollectionSync();
+      expect(deleteFileSync).toHaveBeenCalledWith('collection1');
+      expect(deleteFileSync).toHaveBeenCalledWith('collection2');
+    });
+
+    it('should throw error when it is unable to drop all collections', () => {
+      const fileSync = {
+        deleteFileSync: jest.fn(() => {
+          throw new Error('Some error');
+        })
+      };
+      expect(() => {
+        new Collection(fileSync as unknown as FileSync, collections).dropAllCollectionSync();
+      }).toThrow('Some error');
     });
   });
 });

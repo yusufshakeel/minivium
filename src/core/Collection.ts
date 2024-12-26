@@ -2,11 +2,19 @@ import { CollectionType } from '../types/schema';
 import { FileSync } from './File';
 
 export class Collection {
-  createCollectionsSync(dataDir: string, collections: CollectionType[]) {
+  private readonly fileSync: FileSync;
+  private readonly collections: CollectionType[];
+
+  constructor(fileSync: FileSync, collections: CollectionType[]) {
+    this.fileSync = fileSync;
+    this.collections = collections;
+  }
+
+  createCollectionsSync() {
     try {
-      collections.forEach(collection => {
+      this.collections.forEach(collection => {
         const { name: collectionName } = collection;
-        new FileSync(dataDir).createSync(collectionName, '[]');
+        this.fileSync.createSync(collectionName, '[]');
       });
     } catch (err) {
       console.error(err);
@@ -14,9 +22,21 @@ export class Collection {
     }
   }
 
-  dropCollectionSync(dataDir: string, collectionName: string) {
+  dropCollectionSync(collectionName: string) {
     try {
-      new FileSync(dataDir).deleteFileSync(collectionName);
+      this.fileSync.deleteFileSync(collectionName);
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+  }
+
+  dropAllCollectionSync() {
+    try {
+      this.collections.forEach(collection => {
+        const { name: collectionName } = collection;
+        this.fileSync.deleteFileSync(collectionName);
+      });
     } catch (err) {
       console.error(err);
       throw err;

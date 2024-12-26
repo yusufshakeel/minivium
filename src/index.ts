@@ -7,24 +7,18 @@ import { FileSync } from './core/File';
 import { MiniviumType } from './types/minivium';
 
 function minivium(config: Config): MiniviumType {
-  const init = () => {
-    new Collection().createCollectionsSync(
-      config.dataDir,
-      config.schemaRegistry.getCollections()
-    );
-  };
-
-  const dropCollection = (collectionName: string) => {
-    new Collection().dropCollectionSync(
-      config.dataDir,
-      collectionName
-    );
-  };
-
   const fileSync = new FileSync(config.dataDir);
+  const collections = new Collection(fileSync, config.schemaRegistry.getCollections());
   const query = new Query(config.schemaRegistry, fileSync);
 
-  return { init, query, dropCollection };
+  const init = () => collections.createCollectionsSync();
+
+  const dropCollection =
+    (collectionName: string) => collections.dropCollectionSync(collectionName);
+
+  const dropAllCollections = () => collections.dropAllCollectionSync();
+
+  return { init, query, dropCollection, dropAllCollections };
 }
 
 export { minivium, SchemaRegistry, Op };

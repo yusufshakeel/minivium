@@ -32,6 +32,10 @@ describe('minivium', () => {
     db.init();
   });
 
+  afterAll(() => {
+    db.dropAllCollections();
+  });
+
   it('should be able to initialise empty collections', () => {
     expect(db.query.select('users-e2e')).toStrictEqual([]);
     expect(db.query.select('posts-e2e')).toStrictEqual([]);
