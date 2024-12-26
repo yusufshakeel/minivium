@@ -97,5 +97,16 @@ describe('FileSync', () => {
       expect(existsSync).toHaveBeenCalledWith(filePath);
       expect(unlinkSync).toHaveBeenCalledWith(filePath);
     });
+
+    it('should throw error if file does not exists', () => {
+      existsSync.mockReturnValue(false);
+      unlinkSync.mockReturnValue();
+
+      expect(() => fileSync.deleteFileSync(collectionName))
+        .toThrow(`File '${collectionName}' does not exist`);
+
+      expect(existsSync).toHaveBeenCalledWith(filePath);
+      expect(unlinkSync).not.toHaveBeenCalled();
+    });
   });
 });
