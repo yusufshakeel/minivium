@@ -1,4 +1,4 @@
-import { CollectionType, Schema } from '../types/schema';
+import { CollectionType, Column, Schema } from '../types/schema';
 
 export class SchemaRegistry {
   private readonly schema: Schema;
@@ -15,7 +15,34 @@ export class SchemaRegistry {
     return this.schema.collections;
   }
 
+  getCollection(collectionName: string): CollectionType | undefined {
+    return this.schema.collections.find(c => c.name === collectionName);
+  }
+
   getCollectionNames(): string[] {
     return this.schema.collections.map(c => c.name);
+  }
+
+  getColumns(collectionName: string): Column[] {
+    const collection = this.getCollection(collectionName);
+    if (!collection) {
+      throw new Error(`Collection ${collectionName} does not exist`);
+    }
+    return collection.columns;
+  }
+
+  getColumnNames(collectionName: string): string[] {
+    return this.getColumns(collectionName).map(c => c.name);
+  }
+
+  getRequiredColumn(collectionName: string): Column[] {
+    return this.getColumns(collectionName)
+      .filter(c => !!c.isRequired);
+  }
+
+  getRequiredColumnNames(collectionName: string): string[] {
+    return this.getColumns(collectionName)
+      .filter(c => !!c.isRequired)
+      .map(c => c.name);
   }
 }
