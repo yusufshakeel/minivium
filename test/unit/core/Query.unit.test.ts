@@ -147,8 +147,7 @@ describe('Query', () => {
       );
       const result = query.update(
         'users',
-        { phoneNumber: '1234' },
-        { where: {} }
+        { phoneNumber: '1234' }
       );
       expect(result).toBe(3);
       expect(mockFileSyncInstance.writeSync).toHaveBeenCalledWith(
@@ -221,8 +220,7 @@ describe('Query', () => {
         '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
       );
       const result = query.delete(
-        'users',
-        { where: {} }
+        'users'
       );
       expect(result).toBe(3);
       expect(mockFileSyncInstance.writeSync).toHaveBeenCalledWith(
@@ -240,8 +238,7 @@ describe('Query', () => {
         '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
       );
       const result = query.select(
-        'users',
-        { where: {} }
+        'users'
       );
       expect(result).toStrictEqual([
         { id: '193fce9d5cb', username: 'yusuf', password: '123456' },

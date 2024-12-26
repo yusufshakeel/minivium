@@ -45,6 +45,9 @@ const evaluateWhere =
     return evaluateCondition(item, where as Condition);
   };
 
-export function filter(data: any[], where: Filter): any[] {
+export function filter(data: any[], where?: Filter): any[] {
+  if(!where) {
+    return data;
+  }
   return data.filter(item => evaluateWhere(item, where));
 }

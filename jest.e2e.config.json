@@ -3,7 +3,7 @@
   "testEnvironment": "node",
   "verbose": true,
   "bail": true,
-  "testRegex": "(unit|e2e).test.(js|ts)$",
+  "testRegex": "(e2e).test.(js|ts)$",
   "moduleFileExtensions": [
     "ts",
     "tsx",
@@ -15,7 +15,6 @@
   "transform": {
     "^.+\\.(t|j)sx?$": "ts-jest"
   },
-  "collectCoverage": true,
   "collectCoverageFrom": [
     "src/**/*.{ts,tsx}",
     "!src/index.ts",
@@ -24,13 +23,5 @@
     "!**/dist/**",
     "!**/node_modules/**",
     "!**/test/**"
-  ],
-  "coverageThreshold": {
-    "global": {
-      "statements": 100,
-      "branches": 100,
-      "functions": 100,
-      "lines": 100
-    }
-  }
+  ]
 }

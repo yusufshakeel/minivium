@@ -71,12 +71,12 @@ export class Query {
     return dataToInsert.id;
   }
 
-  select(collectionName: string, option: QueryOption): any[] {
+  select(collectionName: string, option?: QueryOption): any[] {
     this.collectionExists(collectionName);
-    return filter(this.readCollectionContent(collectionName), option.where);
+    return filter(this.readCollectionContent(collectionName), option?.where);
   }
 
-  update(collectionName: string, data: object, option: QueryOption): number {
+  update(collectionName: string, data: object, option?: QueryOption): number {
     this.collectionExists(collectionName);
 
     const dataForColumns = this.getDataForColumns(collectionName, data);
@@ -86,7 +86,7 @@ export class Query {
     let updatedRowCount = 0;
     const dataToUpdate = currentData.reduce(
       (acc: any, curr: any) => {
-        if(filter([curr], option.where).length) {
+        if(filter([curr], option?.where).length) {
           updatedRowCount++;
           return [...acc, { ...curr, ...dataForColumns }];
         }
@@ -102,7 +102,7 @@ export class Query {
     return updatedRowCount;
   }
 
-  delete(collectionName: string, option: QueryOption): number {
+  delete(collectionName: string, option?: QueryOption): number {
     this.collectionExists(collectionName);
 
     const currentData = this.readCollectionContent(collectionName);
@@ -110,7 +110,7 @@ export class Query {
     let deletedRowCount = 0;
     const dataToKeep = currentData.reduce(
       (acc: any, curr: any) => {
-        if(filter([curr], option.where).length) {
+        if(filter([curr], option?.where).length) {
           deletedRowCount++;
           return acc;
         }

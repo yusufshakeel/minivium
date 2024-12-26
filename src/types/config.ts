@@ -1,6 +1,6 @@
 import { SchemaRegistry } from '../core/SchemaRegistry';
 
 export type Config = {
-  dataDir: 'string';
+  dataDir: string;
   schemaRegistry: SchemaRegistry;
 };

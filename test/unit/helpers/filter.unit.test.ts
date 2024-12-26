@@ -17,6 +17,7 @@ describe('filter', () => {
   });
 
   it('should fetch everything if filter option is not provided', () => {
+    expect(filter(data)).toStrictEqual(data);
     expect(filter(data, {})).toStrictEqual(data);
   });
 
