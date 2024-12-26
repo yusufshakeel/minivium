@@ -1,4 +1,4 @@
-import { genId } from '../../../src/core/Id';
+import { genId } from '../../../src/core/id';
 
 describe('Id', () => {
   it('should be able to create id', () => {
