@@ -40,7 +40,7 @@
   },
   "homepage": "https://github.com/yusufshakeel/minivium#readme",
   "engines": {
-    "node": ">16.0.0"
+    "node": ">18.0.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

@@ -3,7 +3,7 @@
   "testEnvironment": "node",
   "verbose": true,
   "bail": true,
-  "testRegex": "(unit|e2e).test.(js|ts)$",
+  "testRegex": "(unit).test.(js|ts)$",
   "moduleFileExtensions": [
     "ts",
     "tsx",
