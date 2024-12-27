@@ -43,12 +43,12 @@ describe('Query', () => {
         .toThrow("Column 'unknownField' does not exists for 'users' collection.");
     });
 
-    it('should throw error when value is missing for mandatory fields', () => {
+    it('should throw error when value is missing for required fields', () => {
       expect(() => query.insert('users', { username: 'yusuf', phoneNumber: '123' }))
-        .toThrow('Provide value for the mandatory fields: password');
+        .toThrow('Provide value for the required fields: password');
 
       expect(() => query.insert('users', { phoneNumber: '123' }))
-        .toThrow('Provide value for the mandatory fields: username, password');
+        .toThrow('Provide value for the required fields: username, password');
     });
 
     it('should be able to insert new data with new id', () => {

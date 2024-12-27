@@ -59,7 +59,7 @@ export class Query {
 
       if (missingRequiredColumns.length) {
         throw new Error(
-          `Provide value for the mandatory fields: ${missingRequiredColumns.join(', ')}`
+          `Provide value for the required fields: ${missingRequiredColumns.join(', ')}`
         );
       }
     }
@@ -68,10 +68,11 @@ export class Query {
 
     const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
 
+    const dataToWrite = [ ...currentCollectionData, dataToInsert ];
+
     if (uniqueColumnNames.length) {
       const violatingColumns = columnsViolatingUniqueConstraint(
-        dataToInsert,
-        currentCollectionData,
+        dataToWrite,
         uniqueColumnNames
       );
       if (violatingColumns.length) {
@@ -79,7 +80,7 @@ export class Query {
       }
     }
 
-    this.writeCollectionContent(collectionName, [ ...currentCollectionData, dataToInsert ]);
+    this.writeCollectionContent(collectionName, dataToWrite);
 
     return dataToInsert.id;
   }
@@ -96,19 +97,6 @@ export class Query {
 
     const currentCollectionData = this.readCollectionContent(collectionName);
 
-    const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
-
-    if (uniqueColumnNames.length) {
-      const violatingColumns = columnsViolatingUniqueConstraint(
-        dataForColumns,
-        currentCollectionData,
-        uniqueColumnNames
-      );
-      if (violatingColumns.length) {
-        throw new Error(`Unique constraint violated for columns: ${violatingColumns.join(', ')}`);
-      }
-    }
-
     let updatedRowCount = 0;
     const dataToUpdate = currentCollectionData.reduce(
       (acc: any, curr: any) => {
@@ -121,6 +109,18 @@ export class Query {
 
     if(updatedRowCount === 0) {
       return updatedRowCount;
+    }
+
+    const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
+
+    if (uniqueColumnNames.length) {
+      const violatingColumns = columnsViolatingUniqueConstraint(
+        dataToUpdate,
+        uniqueColumnNames
+      );
+      if (violatingColumns.length) {
+        throw new Error(`Unique constraint violated for columns: ${violatingColumns.join(', ')}`);
+      }
     }
 
     this.writeCollectionContent(collectionName, dataToUpdate);

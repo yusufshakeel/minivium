@@ -1,30 +1,36 @@
 export function columnsViolatingUniqueConstraint(
-  singleData: any,
-  allData: any[],
+  allRows: any[],
   uniqueColumnNames: string[]
 ): string[] {
-  let columnsToCheck = 0;
-  const filteredSingleDataByUniqueColumns = Object.entries(singleData)
-    .reduce((acc, curr) => {
-      const [column, value] = curr;
-      if (uniqueColumnNames.includes(column)) {
-        columnsToCheck++;
-        return { ...acc, [column]: value };
-      }
-      return acc;
-    }, {} as any);
+  // do nothing when there are no unique columns
+  // or when there is only one row
+  if (!uniqueColumnNames.length || allRows.length === 1) {
+    return [];
+  }
 
-  let violatingCount = 0;
-  const violatingColumns: any = [];
-  for (let i = 0; i < allData.length && violatingCount < columnsToCheck; i++) {
-    const curr = allData[i];
-    for (const column in filteredSingleDataByUniqueColumns) {
-      if (curr[column] === filteredSingleDataByUniqueColumns[column]) {
-        violatingCount++;
-        violatingColumns.push(column);
+  const duplicates: Set<string> = new Set();
+
+  // Create a map to track value occurrences for each column
+  const valueMaps: Record<string, Set<string | number>> = {};
+
+  // Initialize sets for each column
+  uniqueColumnNames.forEach(column => valueMaps[column] = new Set());
+
+  // Iterate through the data and check for duplicates
+  for (const row of allRows) {
+    for (const column of uniqueColumnNames) {
+      const value = row[column];
+      if (valueMaps[column].has(value)) {
+        duplicates.add(column); // Mark column as having duplicates
+      } else {
+        valueMaps[column].add(value);
+      }
+      if (duplicates.size === uniqueColumnNames.length) {
+        return Array.from(duplicates);
       }
     }
   }
 
-  return violatingColumns;
+  // Return an array of column names with duplicates or an empty array
+  return Array.from(duplicates);
 }
