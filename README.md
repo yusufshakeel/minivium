@@ -82,9 +82,9 @@ const schemaRegistry = new SchemaRegistry({
     {
       name: 'users',
       columns: [
-        { name: 'id', isUnqiue: true },
-        { name: 'username', isRequired: true, isUnqiue: true },
-        { name: 'email', isRequired: true, isUnqiue: true },
+        { name: 'id', isUnique: true },
+        { name: 'username', isRequired: true, isUnique: true },
+        { name: 'email', isRequired: true, isUnique: true },
         { name: 'score', isRequired: true },
         { name: 'phoneNumber' },
         { name: 'status', isRequired: true },
