@@ -5,7 +5,7 @@ describe('Schema Registry', () => {
     collections: [{
       name: 'users',
       columns: [
-        { name: 'username', isRequired: true },
+        { name: 'username', isUnique: true, isRequired: true },
         { name: 'password', isRequired: true },
         { name: 'phoneNumber' }
       ]
@@ -17,7 +17,7 @@ describe('Schema Registry', () => {
       collections: [{
         name: 'users',
         columns: [
-          { name: 'username', isRequired: true },
+          { name: 'username', isRequired: true, isUnique: true },
           { name: 'password', isRequired: true },
           { name: 'phoneNumber' }
         ]
@@ -30,7 +30,7 @@ describe('Schema Registry', () => {
       expect(schema.getCollections()).toStrictEqual([{
         name: 'users',
         columns: [
-          { name: 'username', isRequired: true },
+          { name: 'username', isRequired: true, isUnique: true },
           { name: 'password', isRequired: true },
           { name: 'phoneNumber' }
         ]
@@ -49,7 +49,7 @@ describe('Schema Registry', () => {
       expect(schema.getCollection('users')).toStrictEqual({
         name: 'users',
         columns: [
-          { name: 'username', isRequired: true },
+          { name: 'username', isRequired: true, isUnique: true },
           { name: 'password', isRequired: true },
           { name: 'phoneNumber' }
         ]
@@ -64,7 +64,7 @@ describe('Schema Registry', () => {
   describe('getColumns', () => {
     it('should be able to get columns of a collection', () => {
       expect(schema.getColumns('users')).toStrictEqual([
-        { isRequired: true, name: 'username' },
+        { isRequired: true, name: 'username', isUnique: true },
         { isRequired: true, name: 'password' },
         { name: 'phoneNumber' }
       ]);
@@ -83,10 +83,10 @@ describe('Schema Registry', () => {
     });
   });
 
-  describe('getRequiredColumn', () => {
-    it('Should be able to get required column', () => {
-      expect(schema.getRequiredColumn('users')).toStrictEqual([
-        { name: 'username', isRequired: true },
+  describe('getRequiredColumns', () => {
+    it('Should be able to get required columns', () => {
+      expect(schema.getRequiredColumns('users')).toStrictEqual([
+        { name: 'username', isRequired: true, isUnique: true },
         { name: 'password', isRequired: true }
       ]);
     });
@@ -96,6 +96,20 @@ describe('Schema Registry', () => {
     it('Should be able to get required column names', () => {
       expect(schema.getRequiredColumnNames('users'))
         .toStrictEqual(['username', 'password']);
+    });
+  });
+
+  describe('getUniqueColumns', () => {
+    it('should be able to fetch unique columns', () => {
+      expect(schema.getUniqueColumns('users')).toStrictEqual([
+        { name: 'username', isRequired: true, isUnique: true }
+      ]);
+    });
+  });
+
+  describe('getUniqueColumnNames', () => {
+    it('should be able to fetch unique column names', () => {
+      expect(schema.getUniqueColumnNames('users')).toStrictEqual(['username']);
     });
   });
 });

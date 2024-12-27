@@ -15,7 +15,8 @@ describe('Query', () => {
       collections: [{
         name: 'users',
         columns: [
-          { name: 'username', isRequired: true },
+          { name: 'id', isUnique: true },
+          { name: 'username', isRequired: true, isUnique: true },
           { name: 'password', isRequired: true },
           { name: 'phoneNumber' }
         ]
@@ -101,6 +102,16 @@ describe('Query', () => {
 
       d.mockRestore();
     });
+
+    it('should throw error if unique constraint is violated', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+      );
+      expect(() => query.insert('users', { username: 'jane', password: '123456' }))
+        .toThrow('Unique constraint violated for columns: username');
+    });
   });
 
   describe('update', () => {
@@ -158,6 +169,21 @@ describe('Query', () => {
           { id:'193fce9ea27', username:'jane', password:'123456', phoneNumber:'1234' }
         ])
       );
+    });
+
+    it('should throw error if unique constraint is violated', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+      );
+      expect(() => {
+        query.update(
+          'users',
+          { username: 'john', password: '123456' },
+          { where: { id: '193fce9ea27' } }
+        );
+      }).toThrow('Unique constraint violated for columns: username');
     });
   });
 

@@ -2,22 +2,24 @@
 Minimalistic JSON database.
 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/yusufshakeel/minivium)
-[![npm version](https://img.shields.io/badge/npm-0.1.5-blue.svg)](https://www.npmjs.com/package/minivium)
+[![npm version](https://img.shields.io/badge/npm-0.1.6-blue.svg)](https://www.npmjs.com/package/minivium)
 [![npm Downloads](https://img.shields.io/npm/dm/minivium.svg)](https://www.npmjs.com/package/minivium)
 
 ![img.webp](assets/img.webp)
 
 ## Features
 * Minimalistic
-* Atomic writes
-* JSON database
-* Query language
+* Atomic Writes
+* JSON Database
+* Query Language
+* Schema Definition
 
 ## Table of Contents
 * [Getting Started](#getting-started)
   * [Install the package](#install-the-package)
   * [Import](#import)
   * [Create schema registry and data directory](#create-schema-registry-and-data-directory)
+    * [Attributes for columns](#attributes-for-columns)
   * [Minivium reference](#minivium-reference)
   * [Initialise the collections](#initialise-the-collections)
   * [Drop collection](#drop-collection)
@@ -80,8 +82,9 @@ const schemaRegistry = new SchemaRegistry({
     {
       name: 'users',
       columns: [
-        { name: 'username', isRequired: true },
-        { name: 'email', isRequired: true },
+        { name: 'id', isUnqiue: true },
+        { name: 'username', isRequired: true, isUnqiue: true },
+        { name: 'email', isRequired: true, isUnqiue: true },
         { name: 'score', isRequired: true },
         { name: 'phoneNumber' },
         { name: 'status', isRequired: true },
@@ -91,6 +94,15 @@ const schemaRegistry = new SchemaRegistry({
   ]
 });
 ```
+
+#### Attributes for columns
+
+| Attribute  | Purpose                                                                              |
+|------------|--------------------------------------------------------------------------------------|
+| name       | This is the name of the column                                                       |
+| isRequired | Set this to `true` if you want the column value. Default is `false`.                 |
+| isUnique   | Set this to `true` if you want the column to have unique values. Default is `false`. |
+
 
 ### Minivium reference
 

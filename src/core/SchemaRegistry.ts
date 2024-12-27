@@ -35,14 +35,23 @@ export class SchemaRegistry {
     return this.getColumns(collectionName).map(c => c.name);
   }
 
-  getRequiredColumn(collectionName: string): Column[] {
+  getRequiredColumns(collectionName: string): Column[] {
     return this.getColumns(collectionName)
       .filter(c => !!c.isRequired);
   }
 
   getRequiredColumnNames(collectionName: string): string[] {
+    return this.getRequiredColumns(collectionName)
+      .map(c => c.name);
+  }
+
+  getUniqueColumns(collectionName: string): Column[] {
     return this.getColumns(collectionName)
-      .filter(c => !!c.isRequired)
+      .filter(c => !!c.isUnique);
+  }
+
+  getUniqueColumnNames(collectionName: string): string[] {
+    return this.getUniqueColumns(collectionName)
       .map(c => c.name);
   }
 }

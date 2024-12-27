@@ -3,6 +3,7 @@ import { FileSync } from './File';
 import { genId } from '../utils/id';
 import { QueryOption } from '../types/query';
 import { filter } from '../helpers/filter';
+import { columnsViolatingUniqueConstraint } from '../helpers/unique';
 
 export class Query {
   private readonly schemaRegistry: SchemaRegistry;
@@ -49,14 +50,12 @@ export class Query {
 
     const dataToInsert = { id: genId(), ...dataForColumns };
 
-    const requiredColumns = this.schemaRegistry
-      .getColumns(collectionName)
-      .filter(c => !!c.isRequired).map(c => c.name);
+    const requiredColumnNames = this.schemaRegistry.getRequiredColumnNames(collectionName);
 
-    if (requiredColumns) {
+    if (requiredColumnNames.length) {
       const columnsToInsert: string[] = Object.keys(dataToInsert);
       const missingRequiredColumns =
-        requiredColumns.filter(c => !columnsToInsert.includes(c));
+        requiredColumnNames.filter(c => !columnsToInsert.includes(c));
 
       if (missingRequiredColumns.length) {
         throw new Error(
@@ -65,8 +64,22 @@ export class Query {
       }
     }
 
-    const currentData = this.readCollectionContent(collectionName);
-    this.writeCollectionContent(collectionName, [ ...currentData, dataToInsert ]);
+    const currentCollectionData = this.readCollectionContent(collectionName);
+
+    const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
+
+    if (uniqueColumnNames.length) {
+      const violatingColumns = columnsViolatingUniqueConstraint(
+        dataToInsert,
+        currentCollectionData,
+        uniqueColumnNames
+      );
+      if (violatingColumns.length) {
+        throw new Error(`Unique constraint violated for columns: ${violatingColumns.join(', ')}`);
+      }
+    }
+
+    this.writeCollectionContent(collectionName, [ ...currentCollectionData, dataToInsert ]);
 
     return dataToInsert.id;
   }
@@ -81,10 +94,23 @@ export class Query {
 
     const dataForColumns = this.getDataForColumns(collectionName, data);
 
-    const currentData = this.readCollectionContent(collectionName);
+    const currentCollectionData = this.readCollectionContent(collectionName);
+
+    const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
+
+    if (uniqueColumnNames.length) {
+      const violatingColumns = columnsViolatingUniqueConstraint(
+        dataForColumns,
+        currentCollectionData,
+        uniqueColumnNames
+      );
+      if (violatingColumns.length) {
+        throw new Error(`Unique constraint violated for columns: ${violatingColumns.join(', ')}`);
+      }
+    }
 
     let updatedRowCount = 0;
-    const dataToUpdate = currentData.reduce(
+    const dataToUpdate = currentCollectionData.reduce(
       (acc: any, curr: any) => {
         if(filter([curr], option?.where).length) {
           updatedRowCount++;
@@ -105,10 +131,10 @@ export class Query {
   delete(collectionName: string, option?: QueryOption): number {
     this.collectionExists(collectionName);
 
-    const currentData = this.readCollectionContent(collectionName);
+    const currentCollectionData = this.readCollectionContent(collectionName);
 
     let deletedRowCount = 0;
-    const dataToKeep = currentData.reduce(
+    const dataToKeep = currentCollectionData.reduce(
       (acc: any, curr: any) => {
         if(filter([curr], option?.where).length) {
           deletedRowCount++;

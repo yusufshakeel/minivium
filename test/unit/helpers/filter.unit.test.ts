@@ -1,15 +1,8 @@
 import { filter } from '../../../src/helpers/filter';
 import { Op } from '../../../src/core/Operators';
+import { users as data } from '../../testdata/users';
 
 describe('filter', () => {
-  const data = [
-    { id: 1, name: 'john', score: 20, isOnline: false, status: 'active', createdAt: '2024-12-01' },
-    { id: 2, name: 'jane', score: 30, isOnline: true, status: 'active', createdAt: '2024-12-01' },
-    { id: 3, name: 'tom', score: 40, isOnline: false, status: 'inactive', createdAt: '2024-12-02' },
-    { id: 4, name: 'jerry', score: 30, isOnline: true, status: 'active', createdAt: '2024-12-03' },
-    { id: 5, name: 'bruce', score: 50, isOnline: true, status: 'active', createdAt: '2024-12-05' }
-  ];
-
   it('should throw error for invalid operator', () => {
     expect(() => {
       filter(data, { id: { hahaOp: 1 } });

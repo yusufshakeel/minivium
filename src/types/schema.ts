@@ -1,6 +1,7 @@
 export type Column = {
   name: string;
   isRequired?: boolean;
+  isUnique?: boolean;
 };
 
 export type CollectionType = {
