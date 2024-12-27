@@ -11,35 +11,20 @@ export class Collection {
   }
 
   createCollectionsIfNotExistsSync() {
-    try {
-      this.collections.forEach(collection => {
-        const { name: collectionName } = collection;
-        this.fileSync.createFileIfNotExistsSync(collectionName);
-      });
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
+    this.collections.forEach(collection => {
+      const { name: collectionName } = collection;
+      this.fileSync.createFileIfNotExistsSync(collectionName);
+    });
   }
 
   dropCollectionSync(collectionName: string) {
-    try {
-      this.fileSync.deleteFileSync(collectionName);
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
+    this.fileSync.deleteFileSync(collectionName);
   }
 
   dropAllCollectionSync() {
-    try {
-      this.collections.forEach(collection => {
-        const { name: collectionName } = collection;
-        this.fileSync.deleteFileSync(collectionName);
-      });
-    } catch (err) {
-      console.error(err);
-      throw err;
-    }
+    this.collections.forEach(collection => {
+      const { name: collectionName } = collection;
+      this.fileSync.deleteFileSync(collectionName);
+    });
   }
 }
