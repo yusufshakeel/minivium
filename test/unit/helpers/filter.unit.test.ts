@@ -21,23 +21,25 @@ describe('filter', () => {
     expect(filter(data, {})).toStrictEqual(data);
   });
 
-  it('should empty array when no condition is met', () => {
-    const result = filter(data, { id: 1000 });
-    expect(result).toStrictEqual([]);
-  });
+  describe('eq', () => {
+    it('should empty array when no condition is met', () => {
+      const result = filter(data, { id: 1000 });
+      expect(result).toStrictEqual([]);
+    });
 
-  it('should return matching entries by id', () => {
-    const result = filter(data, { id: 2 });
-    expect(result).toStrictEqual([
-      { id: 2, name: 'jane', score: 30, isOnline: true, status: 'active', createdAt: '2024-12-01' }
-    ]);
-  });
+    it('should return matching entries by id', () => {
+      const result = filter(data, { id: 2 });
+      expect(result).toStrictEqual([
+        { id: 2, name: 'jane', score: 30, isOnline: true, status: 'active', createdAt: '2024-12-01' }
+      ]);
+    });
 
-  it('should return matching entries by eq', () => {
-    const result = filter(data, { id: { [Op.eq]: 2 } });
-    expect(result).toStrictEqual([
-      { id: 2, name: 'jane', score: 30, isOnline: true, status: 'active', createdAt: '2024-12-01' }
-    ]);
+    it('should return matching entries by eq', () => {
+      const result = filter(data, { id: { [Op.eq]: 2 } });
+      expect(result).toStrictEqual([
+        { id: 2, name: 'jane', score: 30, isOnline: true, status: 'active', createdAt: '2024-12-01' }
+      ]);
+    });
   });
 
   it('should return matching entries by notEq', () => {
@@ -120,17 +122,28 @@ describe('filter', () => {
     ]);
   });
 
-  it('should return matching entries by and', () => {
-    const result =
-      filter(data, {
-        [Op.and]: [
-          { status: 'active' },
-          { score: { [Op.gte]: 40 } }
-        ]
-      });
-    expect(result).toStrictEqual([
-      { id: 5, name: 'bruce', score: 50, isOnline: true, status: 'active', createdAt: '2024-12-05' }
-    ]);
+  describe('and', () => {
+    it('should return matching entries by and', () => {
+      const result =
+        filter(data, {
+          [Op.and]: [
+            { status: 'active' },
+            { score: { [Op.gte]: 40 } }
+          ]
+        });
+      expect(result).toStrictEqual([
+        { id: 5, name: 'bruce', score: 50, isOnline: true, status: 'active', createdAt: '2024-12-05' }
+      ]);
+    });
+
+    it('should return matching entries by using alternative to AND', () => {
+      expect(filter(data, {
+        status: 'active',
+        score: { [Op.gte]: 40 }
+      })).toStrictEqual([
+        { id: 5, name: 'bruce', score: 50, isOnline: true, status: 'active', createdAt: '2024-12-05' }
+      ]);
+    });
   });
 
   it('should return matching entries by or', () => {

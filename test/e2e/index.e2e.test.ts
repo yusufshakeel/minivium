@@ -25,30 +25,12 @@ describe('minivium', () => {
     ]
   });
 
-  let db: MiniviumType;
+  const db: MiniviumType = minivium({ dataDir, schemaRegistry });
 
-  beforeEach(() => {
-    db = minivium({ dataDir, schemaRegistry });
+  it('end-to-end test', () => {
+    // initialise the collections if not exists
     db.init();
-  });
 
-  afterAll(() => {
-    db.dropAllCollections();
-  });
-
-  it('should be able to initialise empty collections', () => {
-    expect(db.query.select('users-e2e')).toStrictEqual([]);
-    expect(db.query.select('posts-e2e')).toStrictEqual([]);
-  });
-
-  it('should be able to drop collection', () => {
-    const before = db.query.select('users-e2e');
-    db.dropCollection('users-e2e');
-    expect(before).toStrictEqual([]);
-    expect(() => db.query.select('users-e2e')).toThrow("File 'users-e2e' does not exist");
-  });
-
-  it('should be able to insert, update, select and delete data', () => {
     const beforeContent = db.query.select('users-e2e');
 
     const id = db.query.insert('users-e2e', {
@@ -65,6 +47,9 @@ describe('minivium', () => {
       { where: { id } }
     );
 
+    // this should not re-create the collections because they are already created
+    db.init();
+
     const selectedRowAfterUpdate = db.query.select('users-e2e', { where: { id } });
 
     const deletedRowCount = db.query.delete('users-e2e', { where: { id } });
@@ -74,6 +59,7 @@ describe('minivium', () => {
       { where: { id: { [Op.eq]: id } } }
     );
 
+    expect(db.query.select('posts-e2e')).toStrictEqual([]);
     expect(beforeContent).toStrictEqual([]);
     expect(selectedById).toStrictEqual([{
       id,
@@ -90,5 +76,8 @@ describe('minivium', () => {
     }]);
     expect(deletedRowCount).toBe(1);
     expect(selectedRowAfterDelete).toStrictEqual([]);
+
+    // drop all the collections
+    db.dropAllCollections();
   });
 });
