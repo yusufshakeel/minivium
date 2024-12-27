@@ -27,6 +27,6 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - run: npm ci
-    - run: npm bootstrap
+    - run: npm run bootstrap
     - run: npm run lint
     - run: npm run test
