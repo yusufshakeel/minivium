@@ -2,7 +2,7 @@
 Minimalistic JSON database.
 
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/yusufshakeel/minivium)
-[![npm version](https://img.shields.io/badge/npm-0.1.7-blue.svg)](https://www.npmjs.com/package/minivium)
+[![npm version](https://img.shields.io/badge/npm-0.1.8-blue.svg)](https://www.npmjs.com/package/minivium)
 [![npm Downloads](https://img.shields.io/npm/dm/minivium.svg)](https://www.npmjs.com/package/minivium)
 
 ![img.webp](assets/img.webp)
@@ -97,11 +97,11 @@ const schemaRegistry = new SchemaRegistry({
 
 #### Attributes for columns
 
-| Attribute  | Purpose                                                                              |
-|------------|--------------------------------------------------------------------------------------|
-| name       | This is the name of the column                                                       |
-| isRequired | Set this to `true` if you want the column value. Default is `false`.                 |
-| isUnique   | Set this to `true` if you want the column to have unique values. Default is `false`. |
+| Attribute  | Purpose                                                                               |
+|------------|---------------------------------------------------------------------------------------|
+| name       | This is the name of the column                                                        |
+| isRequired | Set this to `true` if you want the column to have a value. Default is `false`.        |
+| isUnique   | Set this to `true` if you want the column to have a unique value. Default is `false`. |
 
 
 ### Minivium reference
