@@ -3,7 +3,7 @@ Minimalistic JSON database.
 
 [![Build Status](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml/badge.svg)](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/yusufshakeel/minivium)
-[![npm version](https://img.shields.io/badge/npm-0.1.16-blue.svg)](https://www.npmjs.com/package/minivium)
+[![npm version](https://img.shields.io/badge/npm-0.1.17-blue.svg)](https://www.npmjs.com/package/minivium)
 [![npm Downloads](https://img.shields.io/npm/dm/minivium.svg)](https://www.npmjs.com/package/minivium)
 
 ![img.webp](assets/img.webp)
@@ -20,7 +20,7 @@ Minimalistic JSON database.
   * [Install the package](#install-the-package)
   * [Import](#import)
   * [Create schema registry and data directory](#create-schema-registry-and-data-directory)
-    * [Attributes for columns](#attributes-for-columns)
+    * [Collection](#Collection)
   * [Minivium reference](#minivium-reference)
   * [Initialise the collections](#initialise-the-collections)
   * [Drop collection](#drop-collection)
@@ -30,6 +30,8 @@ Minimalistic JSON database.
   * [Select](#select)
   * [Update](#update)
   * [Delete](#delete)
+* [Attributes](#attributes)
+* [Alias for attributes](#alias-for-attributes)
 * [Operators for where clause](#operators-for-where-clause)
   * [Equal](#equal-eq)
   * [Not equal](#not-equal-noteq)
@@ -100,7 +102,17 @@ const schemaRegistry = new SchemaRegistry({
 });
 ```
 
-#### Attributes for columns
+#### Collection
+
+A collection (similar to a table in PostgreSQL) consists of a name and columns.
+
+
+| Attribute | Purpose                                                                                    |
+|-----------|--------------------------------------------------------------------------------------------|
+| name      | Name of the collection                                                                     |
+| columns   | Array of columns. Can be set to empty array `[]` if we don't want strict schema structure. |
+
+Attributes for columns.
 
 | Attribute  | Purpose                                                                               |
 |------------|---------------------------------------------------------------------------------------|
@@ -137,6 +149,25 @@ db.dropAllCollections();
 ```
 
 ## Query
+
+Syntax `query.type(collectionName, [data], [option])`
+
+| Particular       | Purpose                                                             |
+|------------------|---------------------------------------------------------------------|
+| `type`           | This represents the query type. Example `insert` query.             |
+| `collectionName` | This is the name of the collection we want the query to run on.     |
+| `[data]`         | This represents the data to [insert](#insert) or [update](#update). |
+| `[option]`       | (Optional) This is the option for the query.                        |
+
+#### Option
+
+| Option         | Purpose                                                                                                  |
+|----------------|----------------------------------------------------------------------------------------------------------|
+| `[where]`      | This represents the where clause and it consists of the common [operators](#operators-for-where-clause). |
+| `[limit]`      | This helps in selecting the first N rows. Refer [limit](#limit)                                          |
+| `[offset]`     | This helps in skipping M rows. Refer [offset](#offset)                                                   |
+| `[attributes]` | This helps in selecting specific columns and also to give alias. Refer [attributes](#attributes)         |
+
 
 ### Insert
 
@@ -202,6 +233,43 @@ const deletedRowCount = db.query.delete(
 **If `option` with `where` clause is not provided then all the rows will be deleted.**
 
 This behavior is similar to databases like PostgreSQL.
+
+## Attributes
+
+Set the `attributes` option to pick the desired columns.
+
+```js
+db.query.select('users', { attributes: ['id', 'username'] });
+```
+
+SQL equivalent
+
+```sql
+select id, username from users;
+```
+
+## Alias for attributes
+
+Pass `[columnName, aliasName]` tuple in the `attributes` option to set an alias for a column.
+
+```js
+db.query.select(
+  'users', 
+  {
+    attributes: [
+      'id', 
+      'username', 
+      ['score', 'totalScore']
+    ]
+  }
+);
+```
+
+SQL equivalent
+
+```sql
+select id, username, score as totalScore from users;
+```
 
 ## Operators for where clause
 
