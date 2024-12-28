@@ -3,7 +3,7 @@ Minimalistic JSON database.
 
 [![Build Status](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml/badge.svg)](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/yusufshakeel/minivium)
-[![npm version](https://img.shields.io/badge/npm-0.1.15-blue.svg)](https://www.npmjs.com/package/minivium)
+[![npm version](https://img.shields.io/badge/npm-0.1.16-blue.svg)](https://www.npmjs.com/package/minivium)
 [![npm Downloads](https://img.shields.io/npm/dm/minivium.svg)](https://www.npmjs.com/package/minivium)
 
 ![img.webp](assets/img.webp)
@@ -43,6 +43,8 @@ Minimalistic JSON database.
   * [And](#and-and)
   * [Or](#or-or)
 * [Limit](#limit)
+* [Offset](#offset)
+* [Limit and Offset](#limit-and-offset)
 * [Limitations](#limitations)
 * [Contribution](#contribution)
 * [License](#license)
@@ -488,6 +490,36 @@ SQL equivalent
 
 ```sql
 select * from users limit 3;
+```
+
+A `{ limit: 0 }` means that the query will return 0 rows, regardless of the data in the collection.
+
+**Limit must not be negative** 
+
+## Offset
+
+Skips a specified number of rows before starting to return rows from a query.
+
+```js
+db.query.select('users', { offset: 2 });
+```
+
+**Limit must not be negative**
+
+## Limit and Offset
+
+The `offset` clause is typically used in conjunction with the `limit` clause to implement pagination.
+* offset `n`: Skips the first `n` rows.
+* limit `m`: Returns the next `m` rows after the skipped rows.
+
+```js
+db.query.select('users', { limit: 3, offset: 3 });
+```
+
+SQL equivalent
+
+```sql
+select * from users limit 3 offset 3;
 ```
 
 ## Limitations
