@@ -373,5 +373,30 @@ describe('Query', () => {
         ]);
       });
     });
+
+    describe('attributes', () => {
+      it('should throw error when unknown column names passed in attributes', () => {
+        expect(() => {
+          query.select('users', { attributes: ['col1', ['col2', 'alias']] });
+        }).toThrow('Invalid column names passed in attributes: col1, col2');
+      });
+
+      it('should return specified columns as per the passed attributes', () => {
+        mockFileSyncInstance.readSync.mockReturnValue(
+          '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+          '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+          '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+        );
+        const result = query.select(
+          'users',
+          { attributes: ['id', 'username', ['phoneNumber', 'contact']] }
+        );
+        expect(result).toStrictEqual([
+          { id: '193fce9d5cb', username: 'yusuf', contact: undefined },
+          { id: '193fce9df12', username: 'john', contact: '123' },
+          { id: '193fce9ea27', username: 'jane', contact: undefined }
+        ]);
+      });
+    });
   });
 });

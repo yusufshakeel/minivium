@@ -1,6 +1,6 @@
 {
   "name": "minivium",
-  "version": "0.1.16",
+  "version": "0.1.17",
   "description": "Minimalistic JSON database.",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
