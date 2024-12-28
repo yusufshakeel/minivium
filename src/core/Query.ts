@@ -1,9 +1,10 @@
 import { SchemaRegistry } from './SchemaRegistry';
 import { FileSync } from './File';
 import { genId } from '../utils/id';
-import { QueryOption, SelectQueryOption } from '../types/query';
+import { QueryOption, SelectQueryAttribute, SelectQueryOption } from '../types/query';
 import { filter } from '../helpers/filter';
 import { columnsViolatingUniqueConstraint } from '../helpers/unique';
+import { selectAttributes } from '../helpers/select';
 
 export class Query {
   private readonly schemaRegistry: SchemaRegistry;
@@ -85,37 +86,63 @@ export class Query {
     return dataToInsert.id;
   }
 
-  select(collectionName: string, option?: SelectQueryOption): any[] {
-    this.collectionExists(collectionName);
+  private validateAttributes(collectionName: string, attributes: SelectQueryAttribute[]) {
+    if (attributes.length) {
+      const columnNames = this.schemaRegistry.getColumnNames(collectionName);
+      const columnsNamesToSelect = attributes.map(v => {
+        if (Array.isArray(v)) {
+          return v[0];
+        }
+        return v;
+      });
+      const isAllValidColumnNames = columnsNamesToSelect.filter(v => {
+        return !columnNames.includes(v);
+      });
+      if(isAllValidColumnNames.length) {
+        throw new Error(`Invalid column names passed in attributes: ${isAllValidColumnNames.join(', ')}`);
+      }
+    }
+  }
 
-    const { limit, offset } = option || {};
-
+  private validateLimitAndOffset(limit: number | undefined, offset: number | undefined) {
     if (limit! < 0) {
       throw new Error('Limit must not be negative');
     }
-
     if (offset! < 0) {
       throw new Error('Offset must not be negative');
     }
+  }
+
+  select(collectionName: string, option?: SelectQueryOption): any[] {
+    this.collectionExists(collectionName);
+
+    const { limit, offset, attributes } = option || {};
+
+    this.validateLimitAndOffset(limit, offset);
 
     if(limit === 0) {
       return [];
     }
 
-    const rowsAfterWhereClauseFilter =
-      filter(this.readCollectionContent(collectionName), option?.where);
+    if (attributes) {
+      this.validateAttributes(collectionName, attributes);
+    }
+
+    let selectedRows = filter(this.readCollectionContent(collectionName), option?.where);
 
     if (limit !== undefined && offset !== undefined) {
-      return rowsAfterWhereClauseFilter.slice(offset, offset + limit);
-    }
-    if (offset !== undefined) {
-      return rowsAfterWhereClauseFilter.slice(offset);
-    }
-    if (limit !== undefined) {
-      return rowsAfterWhereClauseFilter.slice(0, limit);
+      selectedRows = selectedRows.slice(offset, offset + limit);
+    } else if (offset !== undefined) {
+      selectedRows = selectedRows.slice(offset);
+    } else if (limit !== undefined) {
+      selectedRows = selectedRows.slice(0, limit);
     }
 
-    return rowsAfterWhereClauseFilter;
+    if (attributes?.length) {
+      return selectAttributes(attributes, selectedRows);
+    }
+
+    return selectedRows;
   }
 
   update(collectionName: string, data: object, option?: QueryOption): number {
