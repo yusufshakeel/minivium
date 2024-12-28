@@ -7,4 +7,5 @@ export type QueryOption = {
 export type SelectQueryOption = {
   where?: Filter;
   limit?: number;
+  offset?: number;
 };

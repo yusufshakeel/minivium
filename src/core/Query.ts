@@ -87,14 +87,35 @@ export class Query {
 
   select(collectionName: string, option?: SelectQueryOption): any[] {
     this.collectionExists(collectionName);
-    const rowAfterWhereClauseFilter =
-      filter(this.readCollectionContent(collectionName), option?.where);
 
-    if (option?.limit) {
-      return rowAfterWhereClauseFilter.slice(0, option.limit);
+    const { limit, offset } = option || {};
+
+    if (limit! < 0) {
+      throw new Error('Limit must not be negative');
     }
 
-    return rowAfterWhereClauseFilter;
+    if (offset! < 0) {
+      throw new Error('Offset must not be negative');
+    }
+
+    if(limit === 0) {
+      return [];
+    }
+
+    const rowsAfterWhereClauseFilter =
+      filter(this.readCollectionContent(collectionName), option?.where);
+
+    if (limit !== undefined && offset !== undefined) {
+      return rowsAfterWhereClauseFilter.slice(offset, offset + limit);
+    }
+    if (offset !== undefined) {
+      return rowsAfterWhereClauseFilter.slice(offset);
+    }
+    if (limit !== undefined) {
+      return rowsAfterWhereClauseFilter.slice(0, limit);
+    }
+
+    return rowsAfterWhereClauseFilter;
   }
 
   update(collectionName: string, data: object, option?: QueryOption): number {
