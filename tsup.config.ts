@@ -5,6 +5,6 @@ export default defineConfig({
   format: ['cjs', 'esm'], // Build for commonJS and ESmodules
   dts: true, // Generate declaration file (.d.ts)
   splitting: false,
-  sourcemap: true,
+  sourcemap: false, // when true, it will generate source map which will increase the npm package size
   clean: true
 });

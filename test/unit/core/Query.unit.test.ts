@@ -301,19 +301,77 @@ describe('Query', () => {
       expect(result).toStrictEqual([]);
     });
 
-    it('should return first N rows as per limit', () => {
-      mockFileSyncInstance.readSync.mockReturnValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-      );
-      const result = query.select(
-        'users',
-        { limit: 1 }
-      );
-      expect(result).toStrictEqual([
-        { id: '193fce9d5cb', username: 'yusuf', password: '123456' }
-      ]);
+    describe('limit', () => {
+      it('should return first N rows as per limit', () => {
+        mockFileSyncInstance.readSync.mockReturnValue(
+          '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+          '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+          '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+        );
+        const result = query.select(
+          'users',
+          { limit: 1 }
+        );
+        expect(result).toStrictEqual([
+          { id: '193fce9d5cb', username: 'yusuf', password: '123456' }
+        ]);
+      });
+
+      it('should return empty array when limit 0', () => {
+        mockFileSyncInstance.readSync.mockReturnValue(
+          '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+          '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+          '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+        );
+        const result = query.select(
+          'users',
+          { limit: 0 }
+        );
+        expect(result).toStrictEqual([]);
+      });
+
+      it('should throw error when limit is negative', () => {
+        expect(() => query.select('users', { limit: -1 })).toThrow('Limit must not be negative');
+      });
+    });
+
+    describe('offset', () => {
+      it('should return all rows after X offset', () => {
+        mockFileSyncInstance.readSync.mockReturnValue(
+          '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+          '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+          '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+        );
+        const result = query.select(
+          'users',
+          { offset: 1 }
+        );
+        expect(result).toStrictEqual([
+          { id:'193fce9df12',username:'john',password:'123456',phoneNumber:'123' },
+          { id:'193fce9ea27',username:'jane',password:'123456' }
+        ]);
+      });
+
+      it('should throw error when offset is negative', () => {
+        expect(() => query.select('users', { offset: -1 })).toThrow('Offset must not be negative');
+      });
+    });
+
+    describe('limit and offset', () => {
+      it('should return N rows as per limit after X offset', () => {
+        mockFileSyncInstance.readSync.mockReturnValue(
+          '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+          '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+          '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+        );
+        const result = query.select(
+          'users',
+          { limit: 1, offset: 1 }
+        );
+        expect(result).toStrictEqual([
+          { id:'193fce9df12',username:'john',password:'123456',phoneNumber:'123' }
+        ]);
+      });
     });
   });
 });
