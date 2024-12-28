@@ -1,7 +1,7 @@
 import { SchemaRegistry } from './SchemaRegistry';
 import { FileSync } from './File';
 import { genId } from '../utils/id';
-import { QueryOption } from '../types/query';
+import { QueryOption, SelectQueryOption } from '../types/query';
 import { filter } from '../helpers/filter';
 import { columnsViolatingUniqueConstraint } from '../helpers/unique';
 
@@ -85,9 +85,16 @@ export class Query {
     return dataToInsert.id;
   }
 
-  select(collectionName: string, option?: QueryOption): any[] {
+  select(collectionName: string, option?: SelectQueryOption): any[] {
     this.collectionExists(collectionName);
-    return filter(this.readCollectionContent(collectionName), option?.where);
+    const rowAfterWhereClauseFilter =
+      filter(this.readCollectionContent(collectionName), option?.where);
+
+    if (option?.limit) {
+      return rowAfterWhereClauseFilter.slice(0, option.limit);
+    }
+
+    return rowAfterWhereClauseFilter;
   }
 
   update(collectionName: string, data: object, option?: QueryOption): number {

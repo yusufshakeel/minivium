@@ -1,5 +1,10 @@
 import { Filter } from './where';
 
 export type QueryOption = {
-  where: Filter
+  where: Filter;
+};
+
+export type SelectQueryOption = {
+  where?: Filter;
+  limit?: number;
 };

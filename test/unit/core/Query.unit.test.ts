@@ -300,5 +300,20 @@ describe('Query', () => {
       );
       expect(result).toStrictEqual([]);
     });
+
+    it('should return first N rows as per limit', () => {
+      mockFileSyncInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+      );
+      const result = query.select(
+        'users',
+        { limit: 1 }
+      );
+      expect(result).toStrictEqual([
+        { id: '193fce9d5cb', username: 'yusuf', password: '123456' }
+      ]);
+    });
   });
 });

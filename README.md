@@ -3,7 +3,7 @@ Minimalistic JSON database.
 
 [![Build Status](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml/badge.svg)](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/yusufshakeel/minivium)
-[![npm version](https://img.shields.io/badge/npm-0.1.14-blue.svg)](https://www.npmjs.com/package/minivium)
+[![npm version](https://img.shields.io/badge/npm-0.1.15-blue.svg)](https://www.npmjs.com/package/minivium)
 [![npm Downloads](https://img.shields.io/npm/dm/minivium.svg)](https://www.npmjs.com/package/minivium)
 
 ![img.webp](assets/img.webp)
@@ -42,7 +42,9 @@ Minimalistic JSON database.
   * [Between](#between-between)
   * [And](#and-and)
   * [Or](#or-or)
+* [Limit](#limit)
 * [Limitations](#limitations)
+* [Contribution](#contribution)
 * [License](#license)
 * [Donate](#donate)
 
@@ -474,6 +476,20 @@ and (
 );
 ```
 
+## Limit
+
+Restricts the query to return only the first N rows from the collection.
+
+```js
+db.query.select('users', { limit: 3 });
+```
+
+SQL equivalent
+
+```sql
+select * from users limit 3;
+```
+
 ## Limitations
 
 This will work well with small data (about 5MB). You may face performance issues with
@@ -481,6 +497,10 @@ larger data size because the content is serialized using `JSON.stringify` and
 then saved in a file.
 
 If you are planning to have more data then check out PostgreSQL.
+
+## Contribution
+
+[CONTRIBUTING.md](https://github.com/yusufshakeel/minivium/blob/main/CONTRIBUTING.md)
 
 ## License
 
