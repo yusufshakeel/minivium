@@ -2,8 +2,10 @@ import { SchemaRegistry } from '../../../src/core/SchemaRegistry';
 import { FileSync } from '../../../src/core/File';
 import { Query } from '../../../src/core/Query';
 import { Op } from '../../../src/core/Operators';
+import * as Id from '../../../src/utils/id';
 
 jest.mock('../../../src/core/File');
+jest.mock('../../../src/utils/id');
 
 describe('Query', () => {
   let schemaRegistry: SchemaRegistry;
@@ -52,8 +54,8 @@ describe('Query', () => {
     });
 
     it('should be able to insert new data with new id', () => {
-      const d = jest.spyOn(Date, 'now');
-      d.mockReturnValue(1735115003339);
+      const mockGenId = jest.spyOn(Id, 'genId');
+      mockGenId.mockReturnValue('193fce9d5cb-06461496');
 
       mockFileSyncInstance.readSync.mockReturnValue('[]');
       const result = query.insert('users', { username: 'yusuf', password: '123456' });
@@ -61,11 +63,11 @@ describe('Query', () => {
       expect(mockFileSyncInstance.readSync).toHaveBeenCalledWith('users');
       expect(mockFileSyncInstance.writeSync).toHaveBeenCalledWith(
         'users',
-        JSON.stringify([{ id: '193fce9d5cb', username: 'yusuf', password: '123456' }])
+        JSON.stringify([{ id: '193fce9d5cb-06461496', username: 'yusuf', password: '123456' }])
       );
-      expect(result).toBe('193fce9d5cb');
+      expect(result).toBe('193fce9d5cb-06461496');
 
-      d.mockRestore();
+      mockGenId.mockRestore();
     });
 
     it('should be able to insert new data with provided id', () => {
