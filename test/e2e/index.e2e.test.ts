@@ -39,7 +39,13 @@ describe('minivium', () => {
       phoneNumber: '123'
     });
 
+    const ids = db.query.bulkInsert('users-e2e', [
+      { username: 'john', email: 'john@example.com' },
+      { username: 'jane', email: 'jane@example.com' }
+    ]);
+
     const selectedById = db.query.select('users-e2e', { where: { id } });
+    const selectedByIds = db.query.select('users-e2e', { where: { id: { [Op.in]: ids } } });
 
     const updatedRowCount = db.query.update(
       'users-e2e',
@@ -67,6 +73,10 @@ describe('minivium', () => {
       email: 'yusufshakeel@example.com',
       phoneNumber: '123'
     }]);
+    expect(selectedByIds).toStrictEqual([
+      { id: ids[0], username: 'john', email: 'john@example.com' },
+      { id: ids[1], username: 'jane', email: 'jane@example.com' }
+    ]);
     expect(updatedRowCount).toBe(1);
     expect(selectedRowAfterUpdate).toStrictEqual([{
       id,

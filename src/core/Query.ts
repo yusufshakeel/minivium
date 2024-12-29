@@ -45,31 +45,38 @@ export class Query {
   }
 
   insert(collectionName: string, data: object): string {
+    const result = this.bulkInsert(collectionName, [data]);
+    return result[0];
+  }
+
+  bulkInsert(collectionName: string, data: object[]): string[] {
     this.collectionExists(collectionName);
 
-    const dataForColumns = this.getDataForColumns(collectionName, data);
-
-    const dataToInsert = { id: genId(), ...dataForColumns };
+    const dataToInsert = data
+      .map(d => this.getDataForColumns(collectionName, d))
+      .map(d => ({ id: genId(), ...d }));
 
     const requiredColumnNames = this.schemaRegistry.getRequiredColumnNames(collectionName);
 
     if (requiredColumnNames.length) {
-      const columnsToInsert: string[] = Object.keys(dataToInsert);
-      const missingRequiredColumns =
-        requiredColumnNames.filter(c => !columnsToInsert.includes(c));
+      dataToInsert.forEach(d => {
+        const columnsToInsert: string[] = Object.keys(d);
+        const missingRequiredColumns =
+          requiredColumnNames.filter(c => !columnsToInsert.includes(c));
 
-      if (missingRequiredColumns.length) {
-        throw new Error(
-          `Provide value for the required fields: ${missingRequiredColumns.join(', ')}`
-        );
-      }
+        if (missingRequiredColumns.length) {
+          throw new Error(
+            `Provide value for the required fields: ${missingRequiredColumns.join(', ')}`
+          );
+        }
+      });
     }
 
     const currentCollectionData = this.readCollectionContent(collectionName);
 
     const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
 
-    const dataToWrite = [ ...currentCollectionData, dataToInsert ];
+    const dataToWrite = [ ...currentCollectionData, ...dataToInsert ];
 
     if (uniqueColumnNames.length) {
       const violatingColumns = columnsViolatingUniqueConstraint(
@@ -83,7 +90,7 @@ export class Query {
 
     this.writeCollectionContent(collectionName, dataToWrite);
 
-    return dataToInsert.id;
+    return dataToInsert.map(d => d.id);
   }
 
   private validateAttributes(collectionName: string, attributes: SelectQueryAttribute[]) {
