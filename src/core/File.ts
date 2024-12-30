@@ -1,4 +1,4 @@
-import fs from 'fs';
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'fs';
 import path from 'path';
 
 export class FileSync {
@@ -13,33 +13,33 @@ export class FileSync {
   }
 
   private checkExistsSync(collectionName: string) {
-    if (!fs.existsSync(this.getFilePath(collectionName))) {
+    if (!existsSync(this.getFilePath(collectionName))) {
       throw new Error(`File '${collectionName}' does not exist`);
     }
   }
 
   createSync(collectionName: string, content: string): void {
-    fs.writeFileSync(this.getFilePath(collectionName), content, 'utf8');
+    writeFileSync(this.getFilePath(collectionName), content, 'utf8');
   }
 
   readSync(collectionName: string): string {
     this.checkExistsSync(collectionName);
-    return fs.readFileSync(this.getFilePath(collectionName), 'utf8');
+    return readFileSync(this.getFilePath(collectionName), 'utf8');
   }
 
   writeSync(collectionName: string, content: string): void {
     this.checkExistsSync(collectionName);
-    fs.writeFileSync(this.getFilePath(collectionName), content, 'utf8');
+    writeFileSync(this.getFilePath(collectionName), content, 'utf8');
   }
 
   createFileIfNotExistsSync(collectionName: string): void {
-    if(!fs.existsSync(this.getFilePath(collectionName))) {
-      fs.writeFileSync(this.getFilePath(collectionName), '[]', 'utf8');
+    if(!existsSync(this.getFilePath(collectionName))) {
+      writeFileSync(this.getFilePath(collectionName), '[]', 'utf8');
     }
   }
 
   deleteFileSync(collectionName: string): void {
     this.checkExistsSync(collectionName);
-    fs.unlinkSync(this.getFilePath(collectionName));
+    unlinkSync(this.getFilePath(collectionName));
   }
 }
