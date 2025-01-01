@@ -12,19 +12,35 @@ export class Collection {
 
   createCollectionsIfNotExistsSync() {
     this.collections.forEach(collection => {
-      const { name: collectionName } = collection;
-      this.file.createFileIfNotExistsSync(collectionName);
+      this.file.createFileIfNotExistsSync(collection.name);
     });
+  }
+
+  async createCollectionsIfNotExists(): Promise<void[]> {
+    const promises = this.collections.map(
+      collection => this.file.createFileIfNotExists(collection.name)
+    );
+    return Promise.all(promises);
   }
 
   dropCollectionSync(collectionName: string) {
     this.file.deleteFileSync(collectionName);
   }
 
+  async dropCollection(collectionName: string): Promise<void> {
+    return this.file.deleteFile(collectionName);
+  }
+
   dropAllCollectionsSync() {
     this.collections.forEach(collection => {
-      const { name: collectionName } = collection;
-      this.file.deleteFileSync(collectionName);
+      this.file.deleteFileSync(collection.name);
     });
+  }
+
+  async dropAllCollections(): Promise<void[]> {
+    const promises = this.collections.map(
+      collection => this.file.deleteFile(collection.name)
+    );
+    return Promise.all(promises);
   }
 }
