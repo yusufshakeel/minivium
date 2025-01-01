@@ -320,13 +320,11 @@ export class Query {
     return updatedRowCount;
   }
 
-  delete(collectionName: string, option?: QueryOption): number {
+  private baseDelete(collectionName: string, allRows: object[], option?: QueryOption) {
     this.collectionExists(collectionName);
 
-    const currentCollectionData = this.readCollectionContentSync(collectionName);
-
     let deletedRowCount = 0;
-    const dataToKeep = currentCollectionData.reduce(
+    const dataToKeep = allRows.reduce(
       (acc: any, curr: any) => {
         if(filter([curr], option?.where).length) {
           deletedRowCount++;
@@ -334,6 +332,15 @@ export class Query {
         }
         return [...acc, curr];
       }, []);
+
+    return { deletedRowCount, dataToKeep };
+  }
+
+  delete(collectionName: string, option?: QueryOption): number {
+    const currentCollectionData = this.readCollectionContentSync(collectionName);
+
+    const { deletedRowCount, dataToKeep } =
+      this.baseDelete(collectionName, currentCollectionData, option);
 
     if(deletedRowCount === 0) {
       return deletedRowCount;
@@ -345,19 +352,10 @@ export class Query {
   }
 
   async deleteAsync(collectionName: string, option?: QueryOption): Promise<number> {
-    this.collectionExists(collectionName);
-
     const currentCollectionData = await this.readCollectionContent(collectionName);
 
-    let deletedRowCount = 0;
-    const dataToKeep = currentCollectionData.reduce(
-      (acc: any, curr: any) => {
-        if(filter([curr], option?.where).length) {
-          deletedRowCount++;
-          return acc;
-        }
-        return [...acc, curr];
-      }, []);
+    const { deletedRowCount, dataToKeep } =
+      this.baseDelete(collectionName, currentCollectionData, option);
 
     if(deletedRowCount === 0) {
       return deletedRowCount;
