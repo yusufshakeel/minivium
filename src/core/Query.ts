@@ -63,7 +63,7 @@ export class Query {
     return result[0];
   }
 
-  bulkInsert(collectionName: string, data: object[]): string[] {
+  private baseBulkInsert(collectionName: string, allRows: any[], data: object[]) {
     this.collectionExists(collectionName);
 
     const dataToInsert = data
@@ -86,11 +86,9 @@ export class Query {
       });
     }
 
-    const currentCollectionData = this.readCollectionContentSync(collectionName);
-
     const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
 
-    const dataToWrite = [ ...currentCollectionData, ...dataToInsert ];
+    const dataToWrite = [ ...allRows, ...dataToInsert ];
 
     if (uniqueColumnNames.length) {
       const violatingColumns = columnsViolatingUniqueConstraint(
@@ -101,6 +99,15 @@ export class Query {
         throw new Error(`Unique constraint violated for columns: ${violatingColumns.join(', ')}`);
       }
     }
+
+    return { dataToWrite, dataToInsert };
+  }
+
+  bulkInsert(collectionName: string, data: object[]): string[] {
+    const currentCollectionData = this.readCollectionContentSync(collectionName);
+
+    const { dataToWrite, dataToInsert } =
+      this.baseBulkInsert(collectionName, currentCollectionData, data);
 
     this.writeCollectionContentSync(collectionName, dataToWrite);
 
@@ -108,43 +115,10 @@ export class Query {
   }
 
   async bulkInsertAsync(collectionName: string, data: object[]): Promise<string[]> {
-    this.collectionExists(collectionName);
-
-    const dataToInsert = data
-      .map(d => this.getDataForColumns(collectionName, d))
-      .map(d => ({ id: genId(), ...d }));
-
-    const requiredColumnNames = this.schemaRegistry.getRequiredColumnNames(collectionName);
-
-    if (requiredColumnNames.length) {
-      dataToInsert.forEach(d => {
-        const columnsToInsert: string[] = Object.keys(d);
-        const missingRequiredColumns =
-          requiredColumnNames.filter(c => !columnsToInsert.includes(c));
-
-        if (missingRequiredColumns.length) {
-          throw new Error(
-            `Provide value for the required fields: ${missingRequiredColumns.join(', ')}`
-          );
-        }
-      });
-    }
-
     const currentCollectionData = await this.readCollectionContent(collectionName);
 
-    const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
-
-    const dataToWrite = [ ...currentCollectionData, ...dataToInsert ];
-
-    if (uniqueColumnNames.length) {
-      const violatingColumns = columnsViolatingUniqueConstraint(
-        dataToWrite,
-        uniqueColumnNames
-      );
-      if (violatingColumns.length) {
-        throw new Error(`Unique constraint violated for columns: ${violatingColumns.join(', ')}`);
-      }
-    }
+    const { dataToWrite, dataToInsert } =
+      this.baseBulkInsert(collectionName, currentCollectionData, data);
 
     await this.writeCollectionContent(collectionName, dataToWrite);
 
