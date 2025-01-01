@@ -244,15 +244,19 @@ export class Query {
     return selectedRows;
   }
 
-  update(collectionName: string, data: object, option?: QueryOption): number {
+  private baseUpdate(
+    collectionName: string,
+    allRows: any[],
+    data: object,
+    option?: QueryOption
+  ) {
     this.collectionExists(collectionName);
 
-    const dataForColumns = this.getDataForColumns(collectionName, data);
-
-    const currentCollectionData = this.readCollectionContentSync(collectionName);
+    const dataForColumns =
+      this.getDataForColumns(collectionName, data);
 
     let updatedRowCount = 0;
-    const dataToUpdate = currentCollectionData.reduce(
+    const dataToUpdate = allRows.reduce(
       (acc: any, curr: any) => {
         if(filter([curr], option?.where).length) {
           updatedRowCount++;
@@ -262,10 +266,11 @@ export class Query {
       }, []);
 
     if(updatedRowCount === 0) {
-      return updatedRowCount;
+      return { updatedRowCount, dataToUpdate };
     }
 
-    const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
+    const uniqueColumnNames =
+      this.schemaRegistry.getUniqueColumnNames(collectionName);
 
     if (uniqueColumnNames.length) {
       const violatingColumns = columnsViolatingUniqueConstraint(
@@ -273,8 +278,23 @@ export class Query {
         uniqueColumnNames
       );
       if (violatingColumns.length) {
-        throw new Error(`Unique constraint violated for columns: ${violatingColumns.join(', ')}`);
+        throw new Error(
+          `Unique constraint violated for columns: ${violatingColumns.join(', ')}`
+        );
       }
+    }
+
+    return { updatedRowCount, dataToUpdate };
+  }
+
+  update(collectionName: string, data: object, option?: QueryOption): number {
+    const currentCollectionData = this.readCollectionContentSync(collectionName);
+
+    const { updatedRowCount, dataToUpdate } =
+      this.baseUpdate(collectionName, currentCollectionData, data, option);
+
+    if(updatedRowCount === 0) {
+      return updatedRowCount;
     }
 
     this.writeCollectionContentSync(collectionName, dataToUpdate);
@@ -283,36 +303,13 @@ export class Query {
   }
 
   async updateAsync(collectionName: string, data: object, option?: QueryOption): Promise<number> {
-    this.collectionExists(collectionName);
-
-    const dataForColumns = this.getDataForColumns(collectionName, data);
-
     const currentCollectionData = await this.readCollectionContent(collectionName);
 
-    let updatedRowCount = 0;
-    const dataToUpdate = currentCollectionData.reduce(
-      (acc: any, curr: any) => {
-        if(filter([curr], option?.where).length) {
-          updatedRowCount++;
-          return [...acc, { ...curr, ...dataForColumns }];
-        }
-        return [...acc, curr];
-      }, []);
+    const { updatedRowCount, dataToUpdate } =
+      this.baseUpdate(collectionName, currentCollectionData, data, option);
 
     if(updatedRowCount === 0) {
       return updatedRowCount;
-    }
-
-    const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
-
-    if (uniqueColumnNames.length) {
-      const violatingColumns = columnsViolatingUniqueConstraint(
-        dataToUpdate,
-        uniqueColumnNames
-      );
-      if (violatingColumns.length) {
-        throw new Error(`Unique constraint violated for columns: ${violatingColumns.join(', ')}`);
-      }
     }
 
     await this.writeCollectionContent(collectionName, dataToUpdate);
@@ -320,7 +317,7 @@ export class Query {
     return updatedRowCount;
   }
 
-  private baseDelete(collectionName: string, allRows: object[], option?: QueryOption) {
+  private baseDelete(collectionName: string, allRows: any[], option?: QueryOption) {
     this.collectionExists(collectionName);
 
     let deletedRowCount = 0;
