@@ -172,16 +172,16 @@ export class Query {
 
     let selectedRows = filter(allRows, option?.where);
 
+    if (attributes?.length) {
+      selectedRows = selectAttributes(attributes, selectedRows);
+    }
+
     if (limit !== undefined && offset !== undefined) {
       selectedRows = selectedRows.slice(offset, offset + limit);
     } else if (offset !== undefined) {
       selectedRows = selectedRows.slice(offset);
     } else if (limit !== undefined) {
       selectedRows = selectedRows.slice(0, limit);
-    }
-
-    if (attributes?.length) {
-      return selectAttributes(attributes, selectedRows);
     }
 
     return selectedRows;
