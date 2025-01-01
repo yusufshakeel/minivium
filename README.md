@@ -3,7 +3,7 @@ Minimalistic JSON database.
 
 [![Build Status](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml/badge.svg)](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/yusufshakeel/minivium)
-[![npm version](https://img.shields.io/badge/npm-0.2.1-blue.svg)](https://www.npmjs.com/package/minivium)
+[![npm version](https://img.shields.io/badge/npm-0.2.2-blue.svg)](https://www.npmjs.com/package/minivium)
 [![npm Downloads](https://img.shields.io/npm/dm/minivium.svg)](https://www.npmjs.com/package/minivium)
 
 ![img.webp](assets/img.webp)
@@ -286,7 +286,7 @@ Where `ids` is an array of ids.
 
 Sync syntax `select(collectionName, [option])`
 
-Where, `option` consists fo the `where` clause.
+Where, `option` consists of the `where` clause.
 
 Refer [Operators](#operators)
 
@@ -392,7 +392,11 @@ db.query.select(
 SQL equivalent
 
 ```sql
-select id, username, score as totalScore from users;
+select 
+  id, 
+  username, 
+  score as totalScore
+from users;
 ```
 
 ## Operators
