@@ -15,11 +15,11 @@ export class Query {
     this.file = file;
   }
 
-  private readCollectionContent(collectionName: string) {
+  private readCollectionContentSync(collectionName: string) {
     return JSON.parse(this.file.readSync(collectionName));
   }
 
-  private writeCollectionContent(collectionName: string, content: object) {
+  private writeCollectionContentSync(collectionName: string, content: object) {
     this.file.writeSync(collectionName, JSON.stringify(content));
   }
 
@@ -72,7 +72,7 @@ export class Query {
       });
     }
 
-    const currentCollectionData = this.readCollectionContent(collectionName);
+    const currentCollectionData = this.readCollectionContentSync(collectionName);
 
     const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
 
@@ -88,7 +88,7 @@ export class Query {
       }
     }
 
-    this.writeCollectionContent(collectionName, dataToWrite);
+    this.writeCollectionContentSync(collectionName, dataToWrite);
 
     return dataToInsert.map(d => d.id);
   }
@@ -135,7 +135,7 @@ export class Query {
       this.validateAttributes(collectionName, attributes);
     }
 
-    let selectedRows = filter(this.readCollectionContent(collectionName), option?.where);
+    let selectedRows = filter(this.readCollectionContentSync(collectionName), option?.where);
 
     if (limit !== undefined && offset !== undefined) {
       selectedRows = selectedRows.slice(offset, offset + limit);
@@ -157,7 +157,7 @@ export class Query {
 
     const dataForColumns = this.getDataForColumns(collectionName, data);
 
-    const currentCollectionData = this.readCollectionContent(collectionName);
+    const currentCollectionData = this.readCollectionContentSync(collectionName);
 
     let updatedRowCount = 0;
     const dataToUpdate = currentCollectionData.reduce(
@@ -185,7 +185,7 @@ export class Query {
       }
     }
 
-    this.writeCollectionContent(collectionName, dataToUpdate);
+    this.writeCollectionContentSync(collectionName, dataToUpdate);
 
     return updatedRowCount;
   }
@@ -193,7 +193,7 @@ export class Query {
   delete(collectionName: string, option?: QueryOption): number {
     this.collectionExists(collectionName);
 
-    const currentCollectionData = this.readCollectionContent(collectionName);
+    const currentCollectionData = this.readCollectionContentSync(collectionName);
 
     let deletedRowCount = 0;
     const dataToKeep = currentCollectionData.reduce(
@@ -209,7 +209,7 @@ export class Query {
       return deletedRowCount;
     }
 
-    this.writeCollectionContent(collectionName, dataToKeep);
+    this.writeCollectionContentSync(collectionName, dataToKeep);
 
     return deletedRowCount;
   }
