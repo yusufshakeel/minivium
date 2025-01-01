@@ -13,12 +13,30 @@ function minivium(config: Config): MiniviumType {
 
   const init = () => collections.createCollectionsIfNotExistsSync();
 
+  const initAsync = async () => {
+    await collections.createCollectionsIfNotExists();
+  };
+
   const dropCollection =
     (collectionName: string) => collections.dropCollectionSync(collectionName);
 
+  const dropCollectionAsync =
+    async (collectionName: string) => {
+      await collections.dropCollection(collectionName);
+    };
+
   const dropAllCollections = () => collections.dropAllCollectionsSync();
 
-  return { init, query, dropCollection, dropAllCollections };
+  const dropAllCollectionsAsync = async () => {
+    await collections.dropAllCollections();
+  };
+
+  return {
+    init, initAsync,
+    query,
+    dropCollection, dropCollectionAsync,
+    dropAllCollections, dropAllCollectionsAsync
+  };
 }
 
 export { minivium, SchemaRegistry, Op };
