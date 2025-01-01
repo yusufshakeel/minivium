@@ -3,7 +3,7 @@ Minimalistic JSON database.
 
 [![Build Status](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml/badge.svg)](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/yusufshakeel/minivium)
-[![npm version](https://img.shields.io/badge/npm-0.2.0-blue.svg)](https://www.npmjs.com/package/minivium)
+[![npm version](https://img.shields.io/badge/npm-0.2.1-blue.svg)](https://www.npmjs.com/package/minivium)
 [![npm Downloads](https://img.shields.io/npm/dm/minivium.svg)](https://www.npmjs.com/package/minivium)
 
 ![img.webp](assets/img.webp)
@@ -20,12 +20,12 @@ Minimalistic JSON database.
 * [Getting Started](#getting-started)
   * [Install the package](#install-the-package)
   * [Import](#import)
-  * [Collection](#Collection)
-  * [Create schema registry and data directory](#create-schema-registry-and-data-directory)
-  * [Minivium reference](#minivium-reference)
-  * [Initialise the collections](#initialise-the-collections)
-  * [Drop collection](#drop-collection)
-  * [Drop all collection](#drop-all-collection)
+* [Collection](#Collection)
+* [Create schema registry and data directory](#create-schema-registry-and-data-directory)
+* [Minivium reference](#minivium-reference)
+* [Initialise the collections](#initialise-the-collections)
+* [Drop collection](#drop-collection)
+* [Drop all collection](#drop-all-collection)
 * [Query](#query)
   * [Insert](#insert)
   * [Bulk Insert](#bulk-insert)
@@ -34,7 +34,7 @@ Minimalistic JSON database.
   * [Delete](#delete)
 * [Attributes](#attributes)
 * [Alias for attributes](#alias-for-attributes)
-* [Operators for where clause](#operators-for-where-clause)
+* [Operators](#operators)
   * [Equal](#equal-eq)
   * [Not equal](#not-equal-noteq)
   * [In](#in-in)
@@ -82,7 +82,7 @@ import { minivium, SchemaRegistry } from "minivium";
 const { minivium, SchemaRegistry } = require("minivium");
 ```
 
-### Collection
+## Collection
 
 A collection consists of a name and as set of columns.
 
@@ -100,7 +100,7 @@ Attributes for columns.
 | isUnique   | Set this to `true` if you want the column to have a unique value. Default is `false`. |
 
 
-### Create schema registry and data directory.
+## Create schema registry and data directory.
 
 We register our collections via `SchemaRegistry`.
 
@@ -127,13 +127,13 @@ const schemaRegistry = new SchemaRegistry({
 });
 ```
 
-### Minivium reference
+## Minivium reference
 
 ```js
 const db = minivium({ dataDir, schemaRegistry });
 ```
 
-### Initialise the collections
+## Initialise the collections
 
 This will create collections mentioned in the schema registry.
 If a collection exists then it will be skipped.
@@ -150,7 +150,7 @@ Async
 await db.initAsync();
 ```
 
-### Drop collection
+## Drop collection
 
 Sync 
 
@@ -164,7 +164,7 @@ Async
 await db.dropCollectionAsync('users');
 ```
 
-### Drop all collection
+## Drop all collections
 
 Sync
 
@@ -191,12 +191,12 @@ Syntax `query.type(collectionName, [data], [option])`
 
 #### Option
 
-| Option         | Purpose                                                                                                  |
-|----------------|----------------------------------------------------------------------------------------------------------|
-| `[where]`      | This represents the where clause and it consists of the common [operators](#operators-for-where-clause). |
-| `[limit]`      | This helps in selecting the first N rows. Refer [limit](#limit)                                          |
-| `[offset]`     | This helps in skipping M rows. Refer [offset](#offset)                                                   |
-| `[attributes]` | This helps in selecting specific columns and also to give alias. Refer [attributes](#attributes)         |
+| Option         | Purpose                                                                                          |
+|----------------|--------------------------------------------------------------------------------------------------|
+| `[where]`      | This represents the where clause and it consists of the common [operators](#operators).          |
+| `[limit]`      | This helps in selecting the first N rows. Refer [limit](#limit)                                  |
+| `[offset]`     | This helps in skipping M rows. Refer [offset](#offset)                                           |
+| `[attributes]` | This helps in selecting specific columns and also to give alias. Refer [attributes](#attributes) |
 
 
 ### Insert
@@ -288,7 +288,7 @@ Sync syntax `select(collectionName, [option])`
 
 Where, `option` consists fo the `where` clause.
 
-Refer [Operators for where clause](#operators-for-where-clause)
+Refer [Operators](#operators)
 
 ```js
 const rows = db.query.select(
@@ -395,7 +395,7 @@ SQL equivalent
 select id, username, score as totalScore from users;
 ```
 
-## Operators for where clause
+## Operators
 
 Minivium comes with a simple query language that is inspired by Sequalize and Mango Query.
 
