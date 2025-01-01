@@ -137,7 +137,9 @@ describe('File', () => {
       access.mockRejectedValue(new Error('Not found'));
 
       await expect(() => file.read(collectionName))
-        .rejects.toThrow(new Error(`File '${collectionName}' does not exists`));
+        .rejects.toThrow(new Error(
+          `File '${collectionName}' does not exists or is not accessible. Error: Not found`
+        ));
       expect(access).toHaveBeenCalledWith(filePath);
     });
   });
@@ -181,7 +183,9 @@ describe('File', () => {
       access.mockRejectedValue(new Error('Not found'));
 
       await expect(() => file.write(collectionName, content))
-        .rejects.toThrow(new Error(`File '${collectionName}' does not exists`));
+        .rejects.toThrow(new Error(
+          `File '${collectionName}' does not exists or is not accessible. Error: Not found`
+        ));
       expect(access).toHaveBeenCalledWith(filePath);
     });
   });
@@ -224,7 +228,9 @@ describe('File', () => {
       unlink.mockResolvedValue();
 
       await expect(() => file.deleteFile(collectionName))
-        .rejects.toThrow(new Error(`File '${collectionName}' does not exists`));
+        .rejects.toThrow(new Error(
+          `File '${collectionName}' does not exists or is not accessible. Error: Not found`
+        ));
 
       expect(access).toHaveBeenCalledWith(filePath);
       expect(unlink).not.toHaveBeenCalled();

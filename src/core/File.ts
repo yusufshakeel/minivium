@@ -21,10 +21,11 @@ export class File {
     try {
       await access(filePath);
       return true;
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: any) {
       if(shouldThrow) {
-        throw new Error(`File '${collectionName}' does not exists`);
+        throw new Error(
+          `File '${collectionName}' does not exists or is not accessible. Error: ${err.message}`
+        );
       }
       return false;
     }
