@@ -1,5 +1,5 @@
 import { SchemaRegistry } from './SchemaRegistry';
-import { FileSync } from './File';
+import { File } from './File';
 import { genId } from '../utils/id';
 import { QueryOption, SelectQueryAttribute, SelectQueryOption } from '../types/query';
 import { filter } from '../helpers/filter';
@@ -8,40 +8,52 @@ import { selectAttributes } from '../helpers/select';
 
 export class Query {
   private readonly schemaRegistry: SchemaRegistry;
-  private readonly fileSync: FileSync;
+  private readonly file: File;
 
-  constructor(schemaRegistry: SchemaRegistry, fileSync: FileSync) {
+  constructor(schemaRegistry: SchemaRegistry, file: File) {
     this.schemaRegistry = schemaRegistry;
-    this.fileSync = fileSync;
+    this.file = file;
   }
 
-  private readCollectionContent(collectionName: string) {
-    return JSON.parse(this.fileSync.readSync(collectionName));
+  private readCollectionContentSync(collectionName: string) {
+    return JSON.parse(this.file.readSync(collectionName));
   }
 
-  private writeCollectionContent(collectionName: string, content: object) {
-    this.fileSync.writeSync(collectionName, JSON.stringify(content));
+  private async readCollectionContent(collectionName: string) {
+    const content = await this.file.read(collectionName);
+    return JSON.parse(content);
+  }
+
+  private writeCollectionContentSync(collectionName: string, content: object) {
+    this.file.writeSync(collectionName, JSON.stringify(content));
+  }
+
+  private async writeCollectionContent(collectionName: string, content: object) {
+    await this.file.write(collectionName, JSON.stringify(content));
   }
 
   private collectionExists(collectionName: string) {
-    if(!this.schemaRegistry.getCollection(collectionName)) {
+    if (!this.schemaRegistry.getCollection(collectionName)) {
       throw new Error(`Collection '${collectionName}' does not exist`);
     }
   }
 
   private getDataForColumns(collectionName: string, data: object) {
     const columnNames = this.schemaRegistry.getColumnNames(collectionName);
-    return Object.entries(data)
-      .reduce((acc, curr) => {
-        const [key, value] = curr as [string, unknown];
-        if (columnNames.includes(key)) {
-          return { ...acc, [key]: value };
-        } else {
-          throw new Error(
-            `Column '${key}' does not exists for '${collectionName}' collection.`
-          );
-        }
-      }, {} as Record<string, unknown>);
+    if (columnNames.length) {
+      return Object.entries(data)
+        .reduce((acc, curr) => {
+          const [key, value] = curr as [string, unknown];
+          if (columnNames.includes(key)) {
+            return { ...acc, [key]: value };
+          } else {
+            throw new Error(
+              `Column '${key}' does not exists for '${collectionName}' collection.`
+            );
+          }
+        }, {} as Record<string, unknown>);
+    }
+    return data;
   }
 
   insert(collectionName: string, data: object): string {
@@ -49,7 +61,12 @@ export class Query {
     return result[0];
   }
 
-  bulkInsert(collectionName: string, data: object[]): string[] {
+  async insertAsync(collectionName: string, data: object): Promise<string> {
+    const result = await this.bulkInsertAsync(collectionName, [data]);
+    return result[0];
+  }
+
+  private baseBulkInsert(collectionName: string, allRows: any[], data: object[]) {
     this.collectionExists(collectionName);
 
     const dataToInsert = data
@@ -72,11 +89,9 @@ export class Query {
       });
     }
 
-    const currentCollectionData = this.readCollectionContent(collectionName);
-
     const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
 
-    const dataToWrite = [ ...currentCollectionData, ...dataToInsert ];
+    const dataToWrite = [ ...allRows, ...dataToInsert ];
 
     if (uniqueColumnNames.length) {
       const violatingColumns = columnsViolatingUniqueConstraint(
@@ -88,7 +103,27 @@ export class Query {
       }
     }
 
-    this.writeCollectionContent(collectionName, dataToWrite);
+    return { dataToWrite, dataToInsert };
+  }
+
+  bulkInsert(collectionName: string, data: object[]): string[] {
+    const currentCollectionData = this.readCollectionContentSync(collectionName);
+
+    const { dataToWrite, dataToInsert } =
+      this.baseBulkInsert(collectionName, currentCollectionData, data);
+
+    this.writeCollectionContentSync(collectionName, dataToWrite);
+
+    return dataToInsert.map(d => d.id);
+  }
+
+  async bulkInsertAsync(collectionName: string, data: object[]): Promise<string[]> {
+    const currentCollectionData = await this.readCollectionContent(collectionName);
+
+    const { dataToWrite, dataToInsert } =
+      this.baseBulkInsert(collectionName, currentCollectionData, data);
+
+    await this.writeCollectionContent(collectionName, dataToWrite);
 
     return dataToInsert.map(d => d.id);
   }
@@ -105,7 +140,7 @@ export class Query {
       const isAllValidColumnNames = columnsNamesToSelect.filter(v => {
         return !columnNames.includes(v);
       });
-      if(isAllValidColumnNames.length) {
+      if (isAllValidColumnNames.length) {
         throw new Error(`Invalid column names passed in attributes: ${isAllValidColumnNames.join(', ')}`);
       }
     }
@@ -120,14 +155,14 @@ export class Query {
     }
   }
 
-  select(collectionName: string, option?: SelectQueryOption): any[] {
+  private baseSelect(collectionName: string, allRows: any[], option?: SelectQueryOption) {
     this.collectionExists(collectionName);
 
     const { limit, offset, attributes } = option || {};
 
     this.validateLimitAndOffset(limit, offset);
 
-    if(limit === 0) {
+    if (limit === 0) {
       return [];
     }
 
@@ -135,7 +170,7 @@ export class Query {
       this.validateAttributes(collectionName, attributes);
     }
 
-    let selectedRows = filter(this.readCollectionContent(collectionName), option?.where);
+    let selectedRows = filter(allRows, option?.where);
 
     if (limit !== undefined && offset !== undefined) {
       selectedRows = selectedRows.slice(offset, offset + limit);
@@ -152,28 +187,43 @@ export class Query {
     return selectedRows;
   }
 
-  update(collectionName: string, data: object, option?: QueryOption): number {
+  select(collectionName: string, option?: SelectQueryOption): any[] {
+    const currentCollectionData = this.readCollectionContentSync(collectionName);
+    return this.baseSelect(collectionName, currentCollectionData, option);
+  }
+
+  async selectAsync(collectionName: string, option?: SelectQueryOption): Promise<any[]> {
+    const currentCollectionData = await this.readCollectionContent(collectionName);
+    return this.baseSelect(collectionName, currentCollectionData, option);
+  }
+
+  private baseUpdate(
+    collectionName: string,
+    allRows: any[],
+    data: object,
+    option?: QueryOption
+  ) {
     this.collectionExists(collectionName);
 
-    const dataForColumns = this.getDataForColumns(collectionName, data);
-
-    const currentCollectionData = this.readCollectionContent(collectionName);
+    const dataForColumns =
+      this.getDataForColumns(collectionName, data);
 
     let updatedRowCount = 0;
-    const dataToUpdate = currentCollectionData.reduce(
+    const dataToUpdate = allRows.reduce(
       (acc: any, curr: any) => {
-        if(filter([curr], option?.where).length) {
+        if (filter([curr], option?.where).length) {
           updatedRowCount++;
           return [...acc, { ...curr, ...dataForColumns }];
         }
         return [...acc, curr];
       }, []);
 
-    if(updatedRowCount === 0) {
-      return updatedRowCount;
+    if (updatedRowCount === 0) {
+      return { updatedRowCount, dataToUpdate };
     }
 
-    const uniqueColumnNames = this.schemaRegistry.getUniqueColumnNames(collectionName);
+    const uniqueColumnNames =
+      this.schemaRegistry.getUniqueColumnNames(collectionName);
 
     if (uniqueColumnNames.length) {
       const violatingColumns = columnsViolatingUniqueConstraint(
@@ -181,35 +231,87 @@ export class Query {
         uniqueColumnNames
       );
       if (violatingColumns.length) {
-        throw new Error(`Unique constraint violated for columns: ${violatingColumns.join(', ')}`);
+        throw new Error(
+          `Unique constraint violated for columns: ${violatingColumns.join(', ')}`
+        );
       }
     }
 
-    this.writeCollectionContent(collectionName, dataToUpdate);
+    return { updatedRowCount, dataToUpdate };
+  }
+
+  update(collectionName: string, data: object, option?: QueryOption): number {
+    const currentCollectionData = this.readCollectionContentSync(collectionName);
+
+    const { updatedRowCount, dataToUpdate } =
+      this.baseUpdate(collectionName, currentCollectionData, data, option);
+
+    if (updatedRowCount === 0) {
+      return updatedRowCount;
+    }
+
+    this.writeCollectionContentSync(collectionName, dataToUpdate);
 
     return updatedRowCount;
   }
 
-  delete(collectionName: string, option?: QueryOption): number {
+  async updateAsync(collectionName: string, data: object, option?: QueryOption): Promise<number> {
+    const currentCollectionData = await this.readCollectionContent(collectionName);
+
+    const { updatedRowCount, dataToUpdate } =
+      this.baseUpdate(collectionName, currentCollectionData, data, option);
+
+    if (updatedRowCount === 0) {
+      return updatedRowCount;
+    }
+
+    await this.writeCollectionContent(collectionName, dataToUpdate);
+
+    return updatedRowCount;
+  }
+
+  private baseDelete(collectionName: string, allRows: any[], option?: QueryOption) {
     this.collectionExists(collectionName);
 
-    const currentCollectionData = this.readCollectionContent(collectionName);
-
     let deletedRowCount = 0;
-    const dataToKeep = currentCollectionData.reduce(
+    const dataToKeep = allRows.reduce(
       (acc: any, curr: any) => {
-        if(filter([curr], option?.where).length) {
+        if (filter([curr], option?.where).length) {
           deletedRowCount++;
           return acc;
         }
         return [...acc, curr];
       }, []);
 
-    if(deletedRowCount === 0) {
+    return { deletedRowCount, dataToKeep };
+  }
+
+  delete(collectionName: string, option?: QueryOption): number {
+    const currentCollectionData = this.readCollectionContentSync(collectionName);
+
+    const { deletedRowCount, dataToKeep } =
+      this.baseDelete(collectionName, currentCollectionData, option);
+
+    if (deletedRowCount === 0) {
       return deletedRowCount;
     }
 
-    this.writeCollectionContent(collectionName, dataToKeep);
+    this.writeCollectionContentSync(collectionName, dataToKeep);
+
+    return deletedRowCount;
+  }
+
+  async deleteAsync(collectionName: string, option?: QueryOption): Promise<number> {
+    const currentCollectionData = await this.readCollectionContent(collectionName);
+
+    const { deletedRowCount, dataToKeep } =
+      this.baseDelete(collectionName, currentCollectionData, option);
+
+    if (deletedRowCount === 0) {
+      return deletedRowCount;
+    }
+
+    await this.writeCollectionContent(collectionName, dataToKeep);
 
     return deletedRowCount;
   }
