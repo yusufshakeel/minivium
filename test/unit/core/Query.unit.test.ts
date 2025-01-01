@@ -38,11 +38,13 @@ describe('Query', () => {
       '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
       '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
     );
+
+    jest.spyOn(Id, 'genId').mockReturnValue('193fce9d5cb-06461496');
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.resetAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('insert', () => {
@@ -65,9 +67,6 @@ describe('Query', () => {
     });
 
     it('should be able to insert new data with new id', () => {
-      const mockGenId = jest.spyOn(Id, 'genId');
-      mockGenId.mockReturnValue('193fce9d5cb-06461496');
-
       mockFileInstance.readSync.mockReturnValue('[]');
       const result = query.insert('users', { username: 'yusuf', password: '123456' });
 
@@ -77,8 +76,6 @@ describe('Query', () => {
         JSON.stringify([{ id: '193fce9d5cb-06461496', username: 'yusuf', password: '123456' }])
       );
       expect(result).toBe('193fce9d5cb-06461496');
-
-      mockGenId.mockRestore();
     });
 
     it('should be able to insert new data with provided id', () => {
@@ -150,9 +147,6 @@ describe('Query', () => {
     });
 
     it('should be able to insert new data with new id', async () => {
-      const mockGenId = jest.spyOn(Id, 'genId');
-      mockGenId.mockReturnValue('193fce9d5cb-06461496');
-
       mockFileInstance.read.mockResolvedValue('[]');
       const result = await query.insertAsync(
         'users',
@@ -167,8 +161,6 @@ describe('Query', () => {
         ])
       );
       expect(result).toBe('193fce9d5cb-06461496');
-
-      mockGenId.mockRestore();
     });
 
     it('should be able to insert new data with provided id', async () => {
@@ -718,6 +710,62 @@ describe('Query', () => {
           { id: '193fce9ea27', username: 'jane', contact: undefined }
         ]);
       });
+    });
+  });
+
+  describe('schemaless', () => {
+    beforeEach(() => {
+      schemaRegistry = new SchemaRegistry({
+        collections: [{
+          name: 'users',
+          columns: []
+        }]
+      });
+
+      mockFileInstance = new File('/test-dir') as jest.Mocked<File>;
+      query = new Query(schemaRegistry, mockFileInstance);
+
+      mockFileInstance.readSync.mockReturnValue(
+        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
+      );
+    });
+
+    it('should be able to insert new row', () => {
+      const result = query.insert(
+        'users',
+        { username: 'jim', password: '123456', email: 'jim@example.com' }
+      );
+
+      expect(mockFileInstance.readSync).toHaveBeenCalledWith('users');
+      expect(mockFileInstance.writeSync).toHaveBeenCalledWith(
+        'users',
+        JSON.stringify([
+          { id: '193fce9d5cb', username: 'yusuf', password: '123456' },
+          { id: '193fce9df12', username: 'john', password: '123456', phoneNumber: '123' },
+          { id: '193fce9ea27', username: 'jane', password: '123456' },
+          { id: '193fce9d5cb-06461496', username: 'jim', password: '123456', email: 'jim@example.com' }
+        ])
+      );
+      expect(result).toBe('193fce9d5cb-06461496');
+    });
+
+    it('should be able to update existing row', () => {
+      const result = query.update(
+        'users',
+        { address: 'Some address line' },
+        { where: { username: 'jane' } }
+      );
+      expect(result).toBe(1);
+      expect(mockFileInstance.writeSync).toHaveBeenCalledWith(
+        'users',
+        JSON.stringify([
+          { id: '193fce9d5cb', username: 'yusuf', password: '123456' },
+          { id: '193fce9df12', username: 'john', password: '123456', phoneNumber: '123' },
+          { id: '193fce9ea27', username: 'jane', password: '123456', address: 'Some address line' }
+        ])
+      );
     });
   });
 });

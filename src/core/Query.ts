@@ -40,17 +40,20 @@ export class Query {
 
   private getDataForColumns(collectionName: string, data: object) {
     const columnNames = this.schemaRegistry.getColumnNames(collectionName);
-    return Object.entries(data)
-      .reduce((acc, curr) => {
-        const [key, value] = curr as [string, unknown];
-        if (columnNames.includes(key)) {
-          return { ...acc, [key]: value };
-        } else {
-          throw new Error(
-            `Column '${key}' does not exists for '${collectionName}' collection.`
-          );
-        }
-      }, {} as Record<string, unknown>);
+    if (columnNames.length) {
+      return Object.entries(data)
+        .reduce((acc, curr) => {
+          const [key, value] = curr as [string, unknown];
+          if (columnNames.includes(key)) {
+            return { ...acc, [key]: value };
+          } else {
+            throw new Error(
+              `Column '${key}' does not exists for '${collectionName}' collection.`
+            );
+          }
+        }, {} as Record<string, unknown>);
+    }
+    return data;
   }
 
   insert(collectionName: string, data: object): string {

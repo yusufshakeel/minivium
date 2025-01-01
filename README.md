@@ -3,7 +3,7 @@ Minimalistic JSON database.
 
 [![Build Status](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml/badge.svg)](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/yusufshakeel/minivium)
-[![npm version](https://img.shields.io/badge/npm-0.1.20-blue.svg)](https://www.npmjs.com/package/minivium)
+[![npm version](https://img.shields.io/badge/npm-0.2.0-blue.svg)](https://www.npmjs.com/package/minivium)
 [![npm Downloads](https://img.shields.io/npm/dm/minivium.svg)](https://www.npmjs.com/package/minivium)
 
 ![img.webp](assets/img.webp)
@@ -13,14 +13,15 @@ Minimalistic JSON database.
 * Atomic Writes
 * JSON Database
 * Query Language
-* Schema Definition
+* Schema and Schemaless
+* Sync and Async operations
 
 ## Table of Contents
 * [Getting Started](#getting-started)
   * [Install the package](#install-the-package)
   * [Import](#import)
+  * [Collection](#Collection)
   * [Create schema registry and data directory](#create-schema-registry-and-data-directory)
-    * [Collection](#Collection)
   * [Minivium reference](#minivium-reference)
   * [Initialise the collections](#initialise-the-collections)
   * [Drop collection](#drop-collection)
@@ -56,9 +57,14 @@ Minimalistic JSON database.
 ## Getting started
 
 Data is saved in JSON format in collections. A collection is like a table in relational
-database. Each row is saved inside a collection and referred as document (or tuple).
+database. A collection is an array of objects. Each object represents a row.
 
 Minivium comes with a simple query language inspired by Sequalize and Mango Query.
+
+| Relational Database | Minivium             |
+|---------------------|----------------------|
+| Table               | Collection           |
+| Row                 | Row, Tuple, Document |
 
 ### Install the package
 
@@ -75,6 +81,24 @@ import { minivium, SchemaRegistry } from "minivium";
 // CommonJs
 const { minivium, SchemaRegistry } = require("minivium");
 ```
+
+### Collection
+
+A collection consists of a name and as set of columns.
+
+| Attribute | Purpose                                                      |
+|-----------|--------------------------------------------------------------|
+| name      | Name of the collection                                       |
+| columns   | Array of columns. Set it to empty array `[]` for schemaless. |
+
+Attributes for columns.
+
+| Attribute  | Purpose                                                                               |
+|------------|---------------------------------------------------------------------------------------|
+| name       | This is the name of the column                                                        |
+| isRequired | Set this to `true` if you want the column to have a value. Default is `false`.        |
+| isUnique   | Set this to `true` if you want the column to have a unique value. Default is `false`. |
+
 
 ### Create schema registry and data directory.
 
@@ -103,25 +127,6 @@ const schemaRegistry = new SchemaRegistry({
 });
 ```
 
-#### Collection
-
-A collection (similar to a table in PostgreSQL) consists of a name and columns.
-
-
-| Attribute | Purpose                                                                                    |
-|-----------|--------------------------------------------------------------------------------------------|
-| name      | Name of the collection                                                                     |
-| columns   | Array of columns. Can be set to empty array `[]` if we don't want strict schema structure. |
-
-Attributes for columns.
-
-| Attribute  | Purpose                                                                               |
-|------------|---------------------------------------------------------------------------------------|
-| name       | This is the name of the column                                                        |
-| isRequired | Set this to `true` if you want the column to have a value. Default is `false`.        |
-| isUnique   | Set this to `true` if you want the column to have a unique value. Default is `false`. |
-
-
 ### Minivium reference
 
 ```js
@@ -133,20 +138,44 @@ const db = minivium({ dataDir, schemaRegistry });
 This will create collections mentioned in the schema registry.
 If a collection exists then it will be skipped.
 
+Sync
+
 ```js
 db.init();
 ```
 
+Async
+
+```js
+await db.initAsync();
+```
+
 ### Drop collection
+
+Sync 
 
 ```js
 db.dropCollection('users');
 ```
 
+Async
+
+```js
+await db.dropCollectionAsync('users');
+```
+
 ### Drop all collection
+
+Sync
 
 ```js
 db.dropAllCollections();
+```
+
+Async
+
+```js
+await db.dropAllCollectionsAsync();
 ```
 
 ## Query
@@ -172,7 +201,7 @@ Syntax `query.type(collectionName, [data], [option])`
 
 ### Insert
 
-Syntax `insert(collectionName, dataToInsert)`
+Sync syntax `insert(collectionName, dataToInsert)`
 
 Where, `dataToInsert` is an object consisting of column names
 and their values.
@@ -188,12 +217,25 @@ const id = db.query.insert('users', {
 });
 ```
 
-Where `id` is generated by minivium if not provided.
+Async syntax `await insertAsync(collectionName, dataToInsert)`
+
+```js
+const id = await db.query.insertAsync('users', {
+  username: 'yusufshakeel',
+  email: 'yusufshakeel@example.com',
+  score: 10,
+  phoneNumber: '123',
+  status: 'active',
+  createdAt: '2024-12-26',
+});
+```
+
+Note! `id` is generated by minivium if it is not provided.
 
 
 ### Bulk Insert
 
-Syntax `bulkInsert(collectionName, dataToInsert[])`
+Sync syntax `bulkInsert(collectionName, dataToInsert[])`
 
 Where, `dataToInsert[]` is an array of objects consisting of column names
 and their values.
@@ -217,11 +259,32 @@ const ids = db.query.bulkInsert('users', [
 ]);
 ```
 
+Async syntax `await bulkInsertAsync(collectionName, dataToInsert[])`
+
+```js
+const ids = await db.query.bulkInsertAsync('users', [
+  {
+    username: 'john',
+    email: 'john@example.com',
+    score: 10,
+    status: 'active',
+    createdAt: '2024-12-27',
+  },
+  {
+    username: 'jane',
+    email: 'jane@example.com',
+    score: 10,
+    status: 'active',
+    createdAt: '2024-12-27',
+  }
+]);
+```
+
 Where `ids` is an array of ids.
 
 ### Select
 
-Syntax `select(collectionName, [option])`
+Sync syntax `select(collectionName, [option])`
 
 Where, `option` consists fo the `where` clause.
 
@@ -233,11 +296,21 @@ const rows = db.query.select(
   { where: { id } }
 );
 ```
-Don't pass the `option` with `where` clause if you want to select everything.
+
+Async syntax `await selectAsync(collectionName, [option])`
+
+```js
+const rows = await db.query.selectAsync(
+  'users', 
+  { where: { id } }
+);
+```
+
+**If you want to select everything then skip the `option` with `where` clause.**
 
 ### Update
 
-Syntax `update(collectionName, dataToUpdate, [option])`
+Sync syntax `update(collectionName, dataToUpdate, [option])`
 
 ```js
 const updatedRowCount = db.query.update(
@@ -246,13 +319,24 @@ const updatedRowCount = db.query.update(
   { where: { id } }
 );
 ```
+
+Async syntax `await updateAsync(collectionName, dataToUpdate, [option])`
+
+```js
+const updatedRowCount = await db.query.updateAsync(
+  'users',
+  { phoneNumber: '1234' },
+  { where: { id } }
+);
+```
+
 **If `option` with `where` clause is not provided then all the rows will be updated.**
 
 This behavior is similar to databases like PostgreSQL.
 
 ### Delete
 
-Syntax `delete(collectionName, [option])`
+Sync syntax `delete(collectionName, [option])`
 
 ```js
 const deletedRowCount = db.query.delete(
@@ -260,6 +344,16 @@ const deletedRowCount = db.query.delete(
   { where: { id } }
 );
 ```
+
+Async syntax `await deleteAsync(collectionName, [option])`
+
+```js
+const deletedRowCount = await db.query.deleteAsync(
+  'users', 
+  { where: { id } }
+);
+```
+
 **If `option` with `where` clause is not provided then all the rows will be deleted.**
 
 This behavior is similar to databases like PostgreSQL.

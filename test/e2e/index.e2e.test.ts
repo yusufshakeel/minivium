@@ -192,4 +192,72 @@ describe('minivium', () => {
 
     await db.dropAllCollectionsAsync();
   });
+
+  it('end-to-end test - schemaless', async () => {
+    const users = 'users-e2e-async-schemaless';
+    const posts = 'posts-e2e-async-schemaless';
+
+    const schemaRegistry = new SchemaRegistry({
+      collections: [
+        { name: users, columns: [] },
+        { name: posts, columns: [] }
+      ]
+    });
+
+    const db: MiniviumType = minivium({ dataDir, schemaRegistry });
+
+    // initialise the collections if not exists
+    await db.initAsync();
+
+    const beforeContent = await db.query.selectAsync(users);
+
+    const id = await db.query.insertAsync(users, {
+      username: 'yusufshakeel',
+      email: 'yusufshakeel@example.com',
+      phoneNumber: '123'
+    });
+
+    const ids = await db.query.bulkInsertAsync(users, [
+      { username: 'john', email: 'john@example.com' },
+      { username: 'jane', email: 'jane@example.com' }
+    ]);
+
+    const selectedById = await db.query.selectAsync(users, { where: { id } });
+    const selectedByIds = await db.query.selectAsync(users, { where: { id: { [Op.in]: ids } } });
+
+    const updatedRowCount = await db.query.updateAsync(
+      users,
+      { phoneNumber: '1234' },
+      { where: { id } }
+    );
+
+    // this should not re-create the collections because they are already created
+    await db.initAsync();
+
+    const selectedRowAfterUpdate = await db.query.selectAsync(users, { where: { id } });
+
+    const deletedRowCount = await db.query.deleteAsync(users, { where: { id } });
+
+    const selectedRowAfterDelete = await db.query.selectAsync(
+      users,
+      { where: { id: { [Op.eq]: id } } }
+    );
+
+    const postContent = await db.query.selectAsync(posts);
+
+    assertions({
+      postContent,
+      beforeContent,
+      selectedById,
+      id,
+      ids,
+      selectedByIds,
+      updatedRowCount,
+      selectedRowAfterUpdate,
+      deletedRowCount,
+      selectedRowAfterDelete
+    });
+
+    await db.dropAllCollectionsAsync();
+  });
 });
