@@ -1,5 +1,5 @@
 import { SchemaRegistry } from './SchemaRegistry';
-import { FileSync } from './File';
+import { File } from './File';
 import { genId } from '../utils/id';
 import { QueryOption, SelectQueryAttribute, SelectQueryOption } from '../types/query';
 import { filter } from '../helpers/filter';
@@ -8,19 +8,19 @@ import { selectAttributes } from '../helpers/select';
 
 export class Query {
   private readonly schemaRegistry: SchemaRegistry;
-  private readonly fileSync: FileSync;
+  private readonly file: File;
 
-  constructor(schemaRegistry: SchemaRegistry, fileSync: FileSync) {
+  constructor(schemaRegistry: SchemaRegistry, file: File) {
     this.schemaRegistry = schemaRegistry;
-    this.fileSync = fileSync;
+    this.file = file;
   }
 
   private readCollectionContent(collectionName: string) {
-    return JSON.parse(this.fileSync.readSync(collectionName));
+    return JSON.parse(this.file.readSync(collectionName));
   }
 
   private writeCollectionContent(collectionName: string, content: object) {
-    this.fileSync.writeSync(collectionName, JSON.stringify(content));
+    this.file.writeSync(collectionName, JSON.stringify(content));
   }
 
   private collectionExists(collectionName: string) {

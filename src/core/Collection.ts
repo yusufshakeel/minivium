@@ -1,30 +1,30 @@
 import { CollectionType } from '../types/schema';
-import { FileSync } from './File';
+import { File } from './File';
 
 export class Collection {
-  private readonly fileSync: FileSync;
+  private readonly file: File;
   private readonly collections: CollectionType[];
 
-  constructor(fileSync: FileSync, collections: CollectionType[]) {
-    this.fileSync = fileSync;
+  constructor(file: File, collections: CollectionType[]) {
+    this.file = file;
     this.collections = collections;
   }
 
   createCollectionsIfNotExistsSync() {
     this.collections.forEach(collection => {
       const { name: collectionName } = collection;
-      this.fileSync.createFileIfNotExistsSync(collectionName);
+      this.file.createFileIfNotExistsSync(collectionName);
     });
   }
 
   dropCollectionSync(collectionName: string) {
-    this.fileSync.deleteFileSync(collectionName);
+    this.file.deleteFileSync(collectionName);
   }
 
-  dropAllCollectionSync() {
+  dropAllCollectionsSync() {
     this.collections.forEach(collection => {
       const { name: collectionName } = collection;
-      this.fileSync.deleteFileSync(collectionName);
+      this.file.deleteFileSync(collectionName);
     });
   }
 }

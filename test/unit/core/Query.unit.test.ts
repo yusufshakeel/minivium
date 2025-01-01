@@ -1,5 +1,5 @@
 import { SchemaRegistry } from '../../../src/core/SchemaRegistry';
-import { FileSync } from '../../../src/core/File';
+import { File } from '../../../src/core/File';
 import { Query } from '../../../src/core/Query';
 import { Op } from '../../../src/core/Operators';
 import * as Id from '../../../src/utils/id';
@@ -9,7 +9,7 @@ jest.mock('../../../src/utils/id');
 
 describe('Query', () => {
   let schemaRegistry: SchemaRegistry;
-  let mockFileSyncInstance: jest.Mocked<FileSync>;
+  let mockFileSyncInstance: jest.Mocked<File>;
   let query: Query;
 
   beforeEach(() => {
@@ -25,7 +25,7 @@ describe('Query', () => {
       }]
     });
 
-    mockFileSyncInstance = new FileSync('/test-dir') as jest.Mocked<FileSync>;
+    mockFileSyncInstance = new File('/test-dir') as jest.Mocked<File>;
     query = new Query(schemaRegistry, mockFileSyncInstance);
   });
 
@@ -86,7 +86,7 @@ describe('Query', () => {
         }]
       });
 
-      mockFileSyncInstance = new FileSync('/test-dir') as jest.Mocked<FileSync>;
+      mockFileSyncInstance = new File('/test-dir') as jest.Mocked<File>;
       query = new Query(schemaRegistry, mockFileSyncInstance);
 
       mockFileSyncInstance.readSync.mockReturnValue('[]');
