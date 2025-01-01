@@ -33,7 +33,7 @@ export class Query {
   }
 
   private collectionExists(collectionName: string) {
-    if(!this.schemaRegistry.getCollection(collectionName)) {
+    if (!this.schemaRegistry.getCollection(collectionName)) {
       throw new Error(`Collection '${collectionName}' does not exist`);
     }
   }
@@ -137,7 +137,7 @@ export class Query {
       const isAllValidColumnNames = columnsNamesToSelect.filter(v => {
         return !columnNames.includes(v);
       });
-      if(isAllValidColumnNames.length) {
+      if (isAllValidColumnNames.length) {
         throw new Error(`Invalid column names passed in attributes: ${isAllValidColumnNames.join(', ')}`);
       }
     }
@@ -159,7 +159,7 @@ export class Query {
 
     this.validateLimitAndOffset(limit, offset);
 
-    if(limit === 0) {
+    if (limit === 0) {
       return [];
     }
 
@@ -208,14 +208,14 @@ export class Query {
     let updatedRowCount = 0;
     const dataToUpdate = allRows.reduce(
       (acc: any, curr: any) => {
-        if(filter([curr], option?.where).length) {
+        if (filter([curr], option?.where).length) {
           updatedRowCount++;
           return [...acc, { ...curr, ...dataForColumns }];
         }
         return [...acc, curr];
       }, []);
 
-    if(updatedRowCount === 0) {
+    if (updatedRowCount === 0) {
       return { updatedRowCount, dataToUpdate };
     }
 
@@ -243,7 +243,7 @@ export class Query {
     const { updatedRowCount, dataToUpdate } =
       this.baseUpdate(collectionName, currentCollectionData, data, option);
 
-    if(updatedRowCount === 0) {
+    if (updatedRowCount === 0) {
       return updatedRowCount;
     }
 
@@ -258,7 +258,7 @@ export class Query {
     const { updatedRowCount, dataToUpdate } =
       this.baseUpdate(collectionName, currentCollectionData, data, option);
 
-    if(updatedRowCount === 0) {
+    if (updatedRowCount === 0) {
       return updatedRowCount;
     }
 
@@ -273,7 +273,7 @@ export class Query {
     let deletedRowCount = 0;
     const dataToKeep = allRows.reduce(
       (acc: any, curr: any) => {
-        if(filter([curr], option?.where).length) {
+        if (filter([curr], option?.where).length) {
           deletedRowCount++;
           return acc;
         }
@@ -289,7 +289,7 @@ export class Query {
     const { deletedRowCount, dataToKeep } =
       this.baseDelete(collectionName, currentCollectionData, option);
 
-    if(deletedRowCount === 0) {
+    if (deletedRowCount === 0) {
       return deletedRowCount;
     }
 
@@ -304,7 +304,7 @@ export class Query {
     const { deletedRowCount, dataToKeep } =
       this.baseDelete(collectionName, currentCollectionData, option);
 
-    if(deletedRowCount === 0) {
+    if (deletedRowCount === 0) {
       return deletedRowCount;
     }
 
