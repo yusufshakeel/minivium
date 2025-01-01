@@ -155,6 +155,22 @@ export class Query {
     }
   }
 
+  /**
+   * The order of execution is similar to a SQL queries.
+   *
+   * FROM - The collection to choose the base data from
+   *
+   * WHERE - Filter the base data
+   *
+   * SELECT - Returns the final data
+   *
+   * LIMIT and/or OFFSET - Return only the required number of rows.
+   *
+   * @param collectionName {string}
+   * @param allRows {any[]}
+   * @param option {SelectQueryOption}
+   * @private
+   */
   private baseSelect(collectionName: string, allRows: any[], option?: SelectQueryOption) {
     this.collectionExists(collectionName);
 
@@ -170,12 +186,18 @@ export class Query {
       this.validateAttributes(collectionName, attributes);
     }
 
+    // FROM allRows - The collection to choose the base data from
+    // WHERE option?.where - Filter the base data
+    // SELECT - Returns the final data
     let selectedRows = filter(allRows, option?.where);
 
+    // this part will select the specific columns of the collection
+    // and will assign aliases if instructed
     if (attributes?.length) {
       selectedRows = selectAttributes(attributes, selectedRows);
     }
 
+    // this is the LIMIT and/or OFFSET part to return the required number of rows
     if (limit !== undefined && offset !== undefined) {
       selectedRows = selectedRows.slice(offset, offset + limit);
     } else if (offset !== undefined) {
