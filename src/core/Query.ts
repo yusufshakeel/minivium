@@ -178,7 +178,7 @@ export class Query {
     }
   }
 
-  select(collectionName: string, option?: SelectQueryOption): any[] {
+  private baseSelect(collectionName: string, allRows: any[], option?: SelectQueryOption) {
     this.collectionExists(collectionName);
 
     const { limit, offset, attributes } = option || {};
@@ -193,7 +193,7 @@ export class Query {
       this.validateAttributes(collectionName, attributes);
     }
 
-    let selectedRows = filter(this.readCollectionContentSync(collectionName), option?.where);
+    let selectedRows = filter(allRows, option?.where);
 
     if (limit !== undefined && offset !== undefined) {
       selectedRows = selectedRows.slice(offset, offset + limit);
@@ -210,38 +210,14 @@ export class Query {
     return selectedRows;
   }
 
+  select(collectionName: string, option?: SelectQueryOption): any[] {
+    const currentCollectionData = this.readCollectionContentSync(collectionName);
+    return this.baseSelect(collectionName, currentCollectionData, option);
+  }
+
   async selectAsync(collectionName: string, option?: SelectQueryOption): Promise<any[]> {
-    this.collectionExists(collectionName);
-
-    const { limit, offset, attributes } = option || {};
-
-    this.validateLimitAndOffset(limit, offset);
-
-    if(limit === 0) {
-      return [];
-    }
-
-    if (attributes) {
-      this.validateAttributes(collectionName, attributes);
-    }
-
     const currentCollectionData = await this.readCollectionContent(collectionName);
-
-    let selectedRows = filter(currentCollectionData, option?.where);
-
-    if (limit !== undefined && offset !== undefined) {
-      selectedRows = selectedRows.slice(offset, offset + limit);
-    } else if (offset !== undefined) {
-      selectedRows = selectedRows.slice(offset);
-    } else if (limit !== undefined) {
-      selectedRows = selectedRows.slice(0, limit);
-    }
-
-    if (attributes?.length) {
-      return selectAttributes(attributes, selectedRows);
-    }
-
-    return selectedRows;
+    return this.baseSelect(collectionName, currentCollectionData, option);
   }
 
   private baseUpdate(
