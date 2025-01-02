@@ -5,6 +5,7 @@ import { QueryOption, SelectQueryAttribute, SelectQueryOption } from '../types/q
 import { filter } from '../helpers/filter';
 import { columnsViolatingUniqueConstraint } from '../helpers/unique';
 import { selectAttributes } from '../helpers/select';
+import { orderBy } from '../helpers/order';
 
 export class Query {
   private readonly schemaRegistry: SchemaRegistry;
@@ -155,6 +156,24 @@ export class Query {
     }
   }
 
+  /**
+   * The order of execution is similar to a SQL queries.
+   *
+   * FROM - The collection to choose the base data from
+   *
+   * WHERE - Filter the base data
+   *
+   * SELECT - Returns the final data
+   *
+   * ORDER BY - Sorts the final data
+   *
+   * LIMIT and/or OFFSET - Return only the required number of rows.
+   *
+   * @param collectionName {string}
+   * @param allRows {any[]}
+   * @param option {SelectQueryOption}
+   * @private
+   */
   private baseSelect(collectionName: string, allRows: any[], option?: SelectQueryOption) {
     this.collectionExists(collectionName);
 
@@ -170,18 +189,29 @@ export class Query {
       this.validateAttributes(collectionName, attributes);
     }
 
+    // FROM allRows - The collection to choose the base data from
+    // WHERE option?.where - Filter the base data
+    // SELECT - Returns the final data
     let selectedRows = filter(allRows, option?.where);
 
+    // this part will select the specific columns of the collection
+    // and will assign aliases if instructed
+    if (attributes?.length) {
+      selectedRows = selectAttributes(attributes, selectedRows);
+    }
+
+    // this will SORT the final data
+    if (option?.orderBy?.length) {
+      selectedRows = orderBy(selectedRows, option.orderBy);
+    }
+
+    // this is the LIMIT and/or OFFSET part to return the required number of rows
     if (limit !== undefined && offset !== undefined) {
       selectedRows = selectedRows.slice(offset, offset + limit);
     } else if (offset !== undefined) {
       selectedRows = selectedRows.slice(offset);
     } else if (limit !== undefined) {
       selectedRows = selectedRows.slice(0, limit);
-    }
-
-    if (attributes?.length) {
-      return selectAttributes(attributes, selectedRows);
     }
 
     return selectedRows;

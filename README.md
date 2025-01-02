@@ -3,7 +3,7 @@ Minimalistic JSON database.
 
 [![Build Status](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml/badge.svg)](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/yusufshakeel/minivium)
-[![npm version](https://img.shields.io/badge/npm-0.2.2-blue.svg)](https://www.npmjs.com/package/minivium)
+[![npm version](https://img.shields.io/badge/npm-0.2.3-blue.svg)](https://www.npmjs.com/package/minivium)
 [![npm Downloads](https://img.shields.io/npm/dm/minivium.svg)](https://www.npmjs.com/package/minivium)
 
 ![img.webp](assets/img.webp)
@@ -46,6 +46,7 @@ Minimalistic JSON database.
   * [Between](#between-between)
   * [And](#and-and)
   * [Or](#or-or)
+* [Order By](#order-by)
 * [Limit](#limit)
 * [Offset](#offset)
 * [Limit and Offset](#limit-and-offset)
@@ -120,7 +121,8 @@ const schemaRegistry = new SchemaRegistry({
         { name: 'score', isRequired: true },
         { name: 'phoneNumber' },
         { name: 'status', isRequired: true },
-        { name: 'createdAt', isRequired: true }
+        { name: 'createdAt', isRequired: true },
+        { name: 'updatedAt' },
       ]
     }
   ]
@@ -315,7 +317,7 @@ Sync syntax `update(collectionName, dataToUpdate, [option])`
 ```js
 const updatedRowCount = db.query.update(
   'users',
-  { phoneNumber: '1234' },
+  { phoneNumber: '1234', updatedAt: new Date().toISOString() },
   { where: { id } }
 );
 ```
@@ -325,7 +327,7 @@ Async syntax `await updateAsync(collectionName, dataToUpdate, [option])`
 ```js
 const updatedRowCount = await db.query.updateAsync(
   'users',
-  { phoneNumber: '1234' },
+  { phoneNumber: '1234', updatedAt: new Date().toISOString() },
   { where: { id } }
 );
 ```
@@ -673,6 +675,87 @@ and (
   or score >= 40
 );
 ```
+
+## Order By
+
+Set the `orderBy` option to sort the rows.
+
+`orderBy` is an array of objects where, each object consists of the following fields.
+
+| Fields    | Purpose                                                                                    |
+|-----------|--------------------------------------------------------------------------------------------|
+| attribute | Name of the column. It can also be the alias set via the [Attributes](#attributes) option. |
+| order     | This represent the order. Default is `ASC`. Allowed values are `ASC` and `DESC`.           |
+
+### Sort in ascending order.
+
+```js
+db.query.select(
+  'users', 
+  { 
+    orderBy: [
+      { attribute: 'username' }
+    ] 
+  }
+);
+```
+
+SQL equivalent
+
+```sql
+select * from users order by username;
+```
+
+Alternatively,
+```sql
+select * from users order by username ASC;
+```
+
+### Sort in descending order.
+
+```js
+db.query.select(
+  'users', 
+  { 
+    orderBy: [
+      { attribute: 'username', order: Order.DESC }
+    ] 
+  }
+);
+```
+
+SQL equivalent
+
+```sql
+select * from users order by username DESC;
+```
+
+### Sort by multiple columns.
+
+When sorting by multiple columns, minivium first sorts by the first column specified.
+If there are ties (i.e., rows with the same value in the first column),
+it uses the next column in the list to break the tie, and so on.
+
+```js
+db.query.select(
+  'users', 
+  { 
+    orderBy: [
+      { attribute: 'score', order: Order.DESC },
+      { attribute: 'updatedAt', order: Order.ASC }
+    ] 
+  }
+);
+```
+
+SQL equivalent
+
+```sql
+select *
+from users 
+order by score DESC, updatedAt ASC;
+```
+
 
 ## Limit
 
