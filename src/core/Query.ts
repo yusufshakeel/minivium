@@ -5,6 +5,7 @@ import { QueryOption, SelectQueryAttribute, SelectQueryOption } from '../types/q
 import { filter } from '../helpers/filter';
 import { columnsViolatingUniqueConstraint } from '../helpers/unique';
 import { selectAttributes } from '../helpers/select';
+import { orderBy } from '../helpers/order';
 
 export class Query {
   private readonly schemaRegistry: SchemaRegistry;
@@ -164,6 +165,8 @@ export class Query {
    *
    * SELECT - Returns the final data
    *
+   * ORDER BY - Sorts the final data
+   *
    * LIMIT and/or OFFSET - Return only the required number of rows.
    *
    * @param collectionName {string}
@@ -195,6 +198,11 @@ export class Query {
     // and will assign aliases if instructed
     if (attributes?.length) {
       selectedRows = selectAttributes(attributes, selectedRows);
+    }
+
+    // this will SORT the final data
+    if (option?.orderBy?.length) {
+      selectedRows = orderBy(selectedRows, option.orderBy);
     }
 
     // this is the LIMIT and/or OFFSET part to return the required number of rows

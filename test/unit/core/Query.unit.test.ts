@@ -3,6 +3,7 @@ import { File } from '../../../src/core/File';
 import { Query } from '../../../src/core/Query';
 import { Op } from '../../../src/core/Operators';
 import * as Id from '../../../src/utils/id';
+import { Order } from '../../../src/types/query';
 
 jest.mock('../../../src/core/File');
 jest.mock('../../../src/utils/id');
@@ -11,6 +12,16 @@ describe('Query', () => {
   let schemaRegistry: SchemaRegistry;
   let mockFileInstance: jest.Mocked<File>;
   let query: Query;
+
+  const readSyncData =
+    '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+    '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+    '{"id":"193fce9ea27","username":"jane","password":"123456"}]';
+
+  const readData =
+    '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
+    '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
+    '{"id":"193fce9ea27","username":"jane","password":"123456"}]';
 
   beforeEach(() => {
     schemaRegistry = new SchemaRegistry({
@@ -28,16 +39,8 @@ describe('Query', () => {
     mockFileInstance = new File('/test-dir') as jest.Mocked<File>;
     query = new Query(schemaRegistry, mockFileInstance);
 
-    mockFileInstance.readSync.mockReturnValue(
-      '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-      '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-      '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-    );
-    mockFileInstance.read.mockResolvedValue(
-      '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-      '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-      '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-    );
+    mockFileInstance.readSync.mockReturnValue(readSyncData);
+    mockFileInstance.read.mockResolvedValue(readData);
 
     jest.spyOn(Id, 'genId').mockReturnValue('193fce9d5cb-06461496');
   });
@@ -262,11 +265,6 @@ describe('Query', () => {
 
   describe('updateAsync', () => {
     it('should return 0 if zero rows were updated', async () => {
-      mockFileInstance.read.mockResolvedValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-      );
       const result = await query.updateAsync(
         'users',
         { phoneNumber: '123' },
@@ -277,11 +275,6 @@ describe('Query', () => {
     });
 
     it('should return 1 if one row update', async () => {
-      mockFileInstance.read.mockResolvedValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-      );
       const result = await query.updateAsync(
         'users',
         { phoneNumber: '1234' },
@@ -299,11 +292,6 @@ describe('Query', () => {
     });
 
     it('should update all the rows if no filter is supplied', async () => {
-      mockFileInstance.read.mockResolvedValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-      );
       const result = await query.updateAsync(
         'users',
         { phoneNumber: '1234' }
@@ -320,11 +308,6 @@ describe('Query', () => {
     });
 
     it('should throw error if unique constraint is violated', async () => {
-      mockFileInstance.read.mockResolvedValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-      );
       await expect(async () => {
         await query.updateAsync(
           'users',
@@ -337,9 +320,6 @@ describe('Query', () => {
 
   describe('delete', () => {
     it('should return 0 if zero rows were deleted', () => {
-      mockFileInstance.readSync.mockReturnValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"}]'
-      );
       const result = query.delete(
         'users',
         { where: { id: 1 } }
@@ -391,9 +371,6 @@ describe('Query', () => {
 
   describe('deleteAsync', () => {
     it('should return 0 if zero rows were deleted', async () => {
-      mockFileInstance.read.mockResolvedValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"}]'
-      );
       const result = await query.deleteAsync(
         'users',
         { where: { id: 1 } }
@@ -403,11 +380,6 @@ describe('Query', () => {
     });
 
     it('should return 1 if one row was deleted', async () => {
-      mockFileInstance.read.mockResolvedValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-      );
       const result = await query.deleteAsync(
         'users',
         { where: { phoneNumber: '123' } }
@@ -423,11 +395,6 @@ describe('Query', () => {
     });
 
     it('should return N if N row were deleted', async () => {
-      mockFileInstance.read.mockResolvedValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-      );
       const result = await query.deleteAsync(
         'users',
         { where: { id: { [Op.in]: ['193fce9df12', '193fce9ea27'] } } }
@@ -442,11 +409,6 @@ describe('Query', () => {
     });
 
     it('should be able to delete everything if no filter is supplied', async () => {
-      mockFileInstance.read.mockResolvedValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-      );
       const result = await query.deleteAsync(
         'users'
       );
@@ -490,11 +452,6 @@ describe('Query', () => {
 
     describe('limit', () => {
       it('should return first N rows as per limit', () => {
-        mockFileInstance.readSync.mockReturnValue(
-          '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-          '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-          '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-        );
         const result = query.select(
           'users',
           { limit: 1 }
@@ -505,11 +462,6 @@ describe('Query', () => {
       });
 
       it('should return empty array when limit 0', () => {
-        mockFileInstance.readSync.mockReturnValue(
-          '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-          '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-          '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-        );
         const result = query.select(
           'users',
           { limit: 0 }
@@ -525,11 +477,6 @@ describe('Query', () => {
 
     describe('offset', () => {
       it('should return all rows after X offset', () => {
-        mockFileInstance.readSync.mockReturnValue(
-          '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-          '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-          '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-        );
         const result = query.select(
           'users',
           { offset: 1 }
@@ -548,11 +495,6 @@ describe('Query', () => {
 
     describe('limit and offset', () => {
       it('should return N rows as per limit after X offset', () => {
-        mockFileInstance.readSync.mockReturnValue(
-          '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-          '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-          '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-        );
         const result = query.select(
           'users',
           { limit: 1, offset: 1 }
@@ -572,11 +514,6 @@ describe('Query', () => {
       });
 
       it('should return specified columns as per the passed attributes', () => {
-        mockFileInstance.readSync.mockReturnValue(
-          '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-          '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-          '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-        );
         const result = query.select(
           'users',
           { attributes: ['id', 'username', ['phoneNumber', 'contact']] }
@@ -588,15 +525,39 @@ describe('Query', () => {
         ]);
       });
     });
+
+    describe('orderBy', () => {
+      it('should be able to sort in ascending order', () => {
+        const result = query.select(
+          'users',
+          { orderBy: [{ attribute: 'username' }] }
+        );
+        expect(result).toStrictEqual([
+          { id: '193fce9ea27', username: 'jane', password: '123456' },
+          { id: '193fce9df12', username: 'john', password: '123456', phoneNumber: '123' },
+          { id: '193fce9d5cb', username: 'yusuf', password: '123456' }
+        ]);
+      });
+
+      it('should be able to sort by alias names', () => {
+        const result = query.select(
+          'users',
+          {
+            attributes: ['id', ['username', 'name']],
+            orderBy: [{ attribute: 'name', order: Order.ASC }]
+          }
+        );
+        expect(result).toStrictEqual([
+          { id: '193fce9ea27', name: 'jane' },
+          { id: '193fce9df12', name: 'john' },
+          { id: '193fce9d5cb', name: 'yusuf' }
+        ]);
+      });
+    });
   });
 
   describe('selectAsync', () => {
     it('should be able to select all the rows', async () => {
-      mockFileInstance.read.mockResolvedValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-      );
       const result = await query.selectAsync(
         'users'
       );
@@ -608,11 +569,6 @@ describe('Query', () => {
     });
 
     it('should be able to select rows by filter', async () => {
-      mockFileInstance.read.mockResolvedValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-      );
       const result = await query.selectAsync(
         'users',
         { where: { phoneNumber: '123' } }
@@ -623,11 +579,6 @@ describe('Query', () => {
     });
 
     it('should return empty array if no match is found', async () => {
-      mockFileInstance.read.mockResolvedValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-      );
       const result = await query.selectAsync(
         'users',
         { where: { id: '1' } }
@@ -711,6 +662,35 @@ describe('Query', () => {
         ]);
       });
     });
+
+    describe('orderBy', () => {
+      it('should be able to sort in ascending order', async () => {
+        const result = await query.selectAsync(
+          'users',
+          { orderBy: [{ attribute: 'username' }] }
+        );
+        expect(result).toStrictEqual([
+          { id: '193fce9ea27', username: 'jane', password: '123456' },
+          { id: '193fce9df12', username: 'john', password: '123456', phoneNumber: '123' },
+          { id: '193fce9d5cb', username: 'yusuf', password: '123456' }
+        ]);
+      });
+
+      it('should be able to sort by alias names', async () => {
+        const result = await query.selectAsync(
+          'users',
+          {
+            attributes: ['id', ['username', 'name']],
+            orderBy: [{ attribute: 'name', order: Order.ASC }]
+          }
+        );
+        expect(result).toStrictEqual([
+          { id: '193fce9ea27', name: 'jane' },
+          { id: '193fce9df12', name: 'john' },
+          { id: '193fce9d5cb', name: 'yusuf' }
+        ]);
+      });
+    });
   });
 
   describe('schemaless', () => {
@@ -725,11 +705,7 @@ describe('Query', () => {
       mockFileInstance = new File('/test-dir') as jest.Mocked<File>;
       query = new Query(schemaRegistry, mockFileInstance);
 
-      mockFileInstance.readSync.mockReturnValue(
-        '[{"id":"193fce9d5cb","username":"yusuf","password":"123456"},' +
-        '{"id":"193fce9df12","username":"john","password":"123456","phoneNumber":"123"},' +
-        '{"id":"193fce9ea27","username":"jane","password":"123456"}]'
-      );
+      mockFileInstance.readSync.mockReturnValue(readSyncData);
     });
 
     it('should be able to insert new row', () => {

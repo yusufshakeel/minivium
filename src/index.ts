@@ -5,6 +5,7 @@ import { Query } from './core/Query';
 import { Config } from './types/config';
 import { File } from './core/File';
 import { MiniviumType } from './types/minivium';
+import { Order } from './types/query';
 
 function minivium(config: Config): MiniviumType {
   const file = new File(config.dataDir);
@@ -39,4 +40,4 @@ function minivium(config: Config): MiniviumType {
   };
 }
 
-export { minivium, SchemaRegistry, Op };
+export { minivium, SchemaRegistry, Op, Order };

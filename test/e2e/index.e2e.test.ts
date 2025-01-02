@@ -1,5 +1,5 @@
 import path from 'path';
-import { minivium, SchemaRegistry, Op } from '../../src';
+import { minivium, Op, Order, SchemaRegistry } from '../../src';
 import { MiniviumType } from '../../src/types/minivium';
 
 describe('minivium', () => {
@@ -12,6 +12,7 @@ describe('minivium', () => {
       selectedById,
       id,
       ids,
+      selectOrderBy,
       selectedByIds,
       updatedRowCount,
       selectedRowAfterUpdate,
@@ -30,6 +31,24 @@ describe('minivium', () => {
     expect(selectedByIds).toStrictEqual([
       { id: ids[0], username: 'john', email: 'john@example.com' },
       { id: ids[1], username: 'jane', email: 'jane@example.com' }
+    ]);
+    expect(selectOrderBy).toStrictEqual([
+      {
+        id: ids[1],
+        username: 'jane',
+        email: 'jane@example.com'
+      },
+      {
+        id: ids[0],
+        username: 'john',
+        email: 'john@example.com'
+      },
+      {
+        id: id,
+        username: 'yusufshakeel',
+        email: 'yusufshakeel@example.com',
+        phoneNumber: '123'
+      }
     ]);
     expect(updatedRowCount).toBe(1);
     expect(selectedRowAfterUpdate).toStrictEqual([{
@@ -91,6 +110,7 @@ describe('minivium', () => {
       { username: 'jane', email: 'jane@example.com' }
     ]);
 
+    const selectOrderBy = db.query.select(users, { orderBy: [{ attribute: 'username' }] });
     const selectedById = db.query.select(users, { where: { id } });
     const selectedByIds = db.query.select(users, { where: { id: { [Op.in]: ids } } });
 
@@ -120,6 +140,7 @@ describe('minivium', () => {
       selectedById,
       id,
       ids,
+      selectOrderBy,
       selectedByIds,
       updatedRowCount,
       selectedRowAfterUpdate,
@@ -154,6 +175,7 @@ describe('minivium', () => {
       { username: 'jane', email: 'jane@example.com' }
     ]);
 
+    const selectOrderBy = await db.query.selectAsync(users, { orderBy: [{ attribute: 'username', order: Order.ASC }] });
     const selectedById = await db.query.selectAsync(users, { where: { id } });
     const selectedByIds = await db.query.selectAsync(users, { where: { id: { [Op.in]: ids } } });
 
@@ -183,6 +205,7 @@ describe('minivium', () => {
       selectedById,
       id,
       ids,
+      selectOrderBy,
       selectedByIds,
       updatedRowCount,
       selectedRowAfterUpdate,
@@ -222,6 +245,7 @@ describe('minivium', () => {
       { username: 'jane', email: 'jane@example.com' }
     ]);
 
+    const selectOrderBy = await db.query.selectAsync(users, { orderBy: [{ attribute: 'username', order: Order.ASC }] });
     const selectedById = await db.query.selectAsync(users, { where: { id } });
     const selectedByIds = await db.query.selectAsync(users, { where: { id: { [Op.in]: ids } } });
 
@@ -251,6 +275,7 @@ describe('minivium', () => {
       selectedById,
       id,
       ids,
+      selectOrderBy,
       selectedByIds,
       updatedRowCount,
       selectedRowAfterUpdate,
