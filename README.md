@@ -3,7 +3,7 @@ Minimalistic JSON database.
 
 [![Build Status](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml/badge.svg)](https://github.com/yusufshakeel/minivium/actions/workflows/ci.yml)
 [![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/yusufshakeel/minivium)
-[![npm version](https://img.shields.io/badge/npm-0.2.3-blue.svg)](https://www.npmjs.com/package/minivium)
+[![npm version](https://img.shields.io/badge/npm-0.2.4-blue.svg)](https://www.npmjs.com/package/minivium)
 [![npm Downloads](https://img.shields.io/npm/dm/minivium.svg)](https://www.npmjs.com/package/minivium)
 
 ![img.webp](assets/img.webp)
@@ -25,7 +25,7 @@ Minimalistic JSON database.
 * [Minivium reference](#minivium-reference)
 * [Initialise the collections](#initialise-the-collections)
 * [Drop collection](#drop-collection)
-* [Drop all collection](#drop-all-collection)
+* [Drop all collections](#drop-all-collections)
 * [Query](#query)
   * [Insert](#insert)
   * [Bulk Insert](#bulk-insert)
