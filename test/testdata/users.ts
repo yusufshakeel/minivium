@@ -12,3 +12,9 @@ export const usersForSorting = [
   { id: 3, firstName: 'Alice', lastName: 'Anderson', createdAt: '2025-01-02', updatedAt: '2025-01-04' },
   { id: 4, firstName: 'Bob', lastName: 'Builder', createdAt: '2025-01-02', updatedAt: '2025-01-02' }
 ];
+
+export const userMembershipForColumnWithArrayOfValues = [
+  { id: 1, membership: ['red', 'green'] },
+  { id: 2, membership: ['red', 'green', 'blue'] },
+  { id: 3, membership: ['yellow'] }
+];
