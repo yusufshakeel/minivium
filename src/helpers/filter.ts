@@ -2,16 +2,28 @@ import { Op } from '../core/Operators';
 import { Filter, Condition } from '../types/where';
 
 const actions: any = {
-  [Op.eq]: (itemValue: any, value: any) => itemValue === value,
-  [Op.notEq]: (itemValue: any, value: any) => itemValue !== value,
-  [Op.in]: (itemValue: any, value: any) => value.includes(itemValue),
-  [Op.notIn]: (itemValue: any, value: any) => !value.includes(itemValue),
-  [Op.gt]: (itemValue: any, value: any) => itemValue > value,
-  [Op.gte]: (itemValue: any, value: any) => itemValue >= value,
-  [Op.lt]: (itemValue: any, value: any) => itemValue < value,
-  [Op.lte]: (itemValue: any, value: any) => itemValue <= value,
-  [Op.between]: (itemValue: any, value: any) =>
-    itemValue >= value[0] && itemValue <= value[1]
+  [Op.eq]: (fieldValue: any, searchValue: any) => fieldValue === searchValue,
+  [Op.notEq]: (fieldValue: any, searchValue: any) => fieldValue !== searchValue,
+  [Op.in]: (needle: any | any[], haystack: any[]) => {
+    if (Array.isArray(needle)) {
+      return haystack.some(h => needle.includes(h));
+    } else {
+      return haystack.includes(needle);
+    }
+  },
+  [Op.notIn]: (needle: any, haystack: any[]) => {
+    if (Array.isArray(needle)) {
+      return haystack.every(h => !needle.includes(h));
+    } else {
+      return !haystack.includes(needle);
+    }
+  },
+  [Op.gt]: (fieldValue: any, searchValue: any) => fieldValue > searchValue,
+  [Op.gte]: (fieldValue: any, searchValue: any) => fieldValue >= searchValue,
+  [Op.lt]: (fieldValue: any, searchValue: any) => fieldValue < searchValue,
+  [Op.lte]: (fieldValue: any, searchValue: any) => fieldValue <= searchValue,
+  [Op.between]: (fieldValue: any, betweenValues: any) =>
+    fieldValue >= betweenValues[0] && fieldValue <= betweenValues[1]
 };
 
 const evaluateCondition =
